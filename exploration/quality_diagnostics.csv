@@ -1,0 +1,10 @@
+Quality_Issue,Affected_Rows,Percentage_Of_Total
+Invalid Latitude (|LAT| > 90 or 0.0),0,0
+Invalid Longitude (|LON| > 180 or 0.0),0,0
+Impossible Speed (SOG > 60 knots),160613,0.26532885667601336
+Negative Speed (SOG < 0),0,0
+Anomalous MMSI (Length != 9 or Dummy),49897,0.08242865746585294
+Heading Uninformative (511.0),33535628,55.40005998986447
+Invalid Heading Out of Bounds,1061,0.0017527467697711283
+Invalid Dimensions (Length/Width <= 0),2284033,3.7731682024511395
+Duplicate Positions (MMSI + Timestamp + Coordinates),1400,0.002312766708463317
