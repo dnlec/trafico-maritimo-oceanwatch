@@ -1,9 +1,0 @@
-For requirement 3 of the project i need to justify my technical decisions based on the plan. 
-i am doing re quirement 3 of the project. the document says that i need to justify my technical decisions based on the plan in Spanish.
-
-Follow this estructure:
-"La consulta se hizo de esta manera porque <razones principales>. <explicacion tecnica de cosas no obvias>.
-No se hizo de otra manera porque <justificar que nuestra estrategia es la mejor o que simplemente no se podia hacer de otra forma (por que?)>"
-
-
-

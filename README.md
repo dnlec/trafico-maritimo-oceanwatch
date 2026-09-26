@@ -33,10 +33,15 @@ La tabla lleva **comentarios** (catálogo, esquema, tabla y cada columna) y **me
 .
 ├── notebook/
 │   └── proyecto_ocean_watch.ipynb   # Notebook principal (Requisitos 1–5)
+├── docs/
+│   ├── Proyecto_Final_..._Parte 1.pdf   # Enunciado del proyecto
+│   └── data-dictionary.pdf              # Diccionario de datos AIS
+├── exploration/                     # Resultados exportados de la exploración (CSV)
+│   ├── daily_summary.csv
+│   ├── quality_diagnostics.csv
+│   ├── size_metrics.csv
+│   └── vessel_type_dist.csv
 ├── UpdatedPub150.csv                # World Port Index
-├── data-dictionary.pdf              # Diccionario de datos AIS
-├── Proyecto_Final_..._Parte 1.pdf   # Enunciado del proyecto
-├── exploration/                     # Exploración previa / borradores
 └── README.md
 ```
 
@@ -67,7 +72,8 @@ y decisiones de formato/tabla/layout: **CSV vs Parquet vs Delta**, partición po
 `ZORDER (h3_cell)`. Evidencia medida: bytes (6.04 GB → 2.01 GB → 1.48 GB), archivos leídos por la
 consulta (Parquet 6 vs Delta 1) y efecto de `OPTIMIZE` a esta escala, con tabla resumen y conclusión.
 - **Requisito 5 — Gobernanza.** Comentarios y metadatos aplicados sobre los activos en Unity Catalog
-(aplicados directamente en Databricks).
+(aplicados directamente en Databricks). El notebook incluye una celda de verificación (`DESCRIBE EXTENDED`)
+  que deja evidencia del comentario y las `TBLPROPERTIES` de la tabla.
 
 
 
