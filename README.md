@@ -32,7 +32,7 @@ La tabla lleva **comentarios** (catálogo, esquema, tabla y cada columna) y **me
 ```
 .
 ├── src/
-│   └── proyecto_ocean_watch.py      # Notebook principal (Requisitos 1–5), formato fuente Databricks
+│   └── proyecto_ocean_watch.ipynb   # Notebook principal (Requisitos 1–5)
 ├── docs/
 │   ├── Proyecto_Final_..._Parte 1.pdf   # Enunciado del proyecto
 │   └── data-dictionary.pdf              # Diccionario de datos AIS
@@ -52,7 +52,7 @@ La tabla lleva **comentarios** (catálogo, esquema, tabla y cada columna) y **me
 
 ## Contenido del notebook
 
-El notebook `src/proyecto_ocean_watch.py` está organizado por requisito, con celdas de markdown
+El notebook `src/proyecto_ocean_watch.ipynb` está organizado por requisito, con celdas de markdown
 que explican y justifican cada paso:
 
 - **Requisito 1 — Ingesta.** Descarga con reintentos y verificación de integridad de los 7 ZIP, extracción
@@ -79,10 +79,10 @@ consulta (Parquet 6 vs Delta 1) y efecto de `OPTIMIZE` a esta escala, con tabla 
 
 ## Cómo ejecutarlo
 
-El archivo `src/proyecto_ocean_watch.py` es un notebook en formato fuente de Databricks
-(`# Databricks notebook source` y `# COMMAND ----------`). Con la extensión de Databricks, **Run Cell**
-ejecuta cada celda desde el IDE contra serverless. La primera celda de código abre la sesión y apunta
-a `proyecto_datos.default`, donde ya están la tabla `ais_positions_delta` y el volume `data`.
+Abre `src/proyecto_ocean_watch.ipynb` y ejecuta las celdas con la extensión de Databricks.
+La primera celda de código abre la sesión y apunta a `proyecto_datos.default`, donde ya están
+la tabla `ais_positions_delta` y el volume `data`. La salida de cada celda queda guardada en el
+archivo, así que se puede leer sin volver a ejecutar.
 
 Los requisitos 2–4 dependen del DataFrame `df_ais` de la celda de lectura. La celda de descarga no
 vuelve a bajar los ZIP si los 7 CSV siguen en el volume.
