@@ -79,6 +79,24 @@ archivo, así que se puede leer sin volver a ejecutar.
 Los requisitos 2–4 dependen del DataFrame `df_ais` de la celda de lectura. La celda de descarga no
 vuelve a bajar los ZIP si los 7 CSV siguen en el volume.
 
+## Cómo trabajar en el workspace institucional
+
+Para quien edita solo desde el editor web de Databricks:
+
+1. Crea una carpeta Git: **Workspace > Create > Git folder** y pega
+   `https://github.com/dnlec/trafico-maritimo-oceanwatch`.
+2. Abre `src/proyecto_ocean_watch.ipynb`.
+3. Adjunta el clúster compartido `1114-011114-9wt67574`.
+4. Ejecuta el notebook.
+5. Haz pull antes de editar, y publica los cambios con commit y push desde el diálogo Git de esa carpeta.
+
+`databricks.yml` y `.vscode` son solo para el desarrollo local con la extensión de Databricks en VS Code;
+en el editor web se pueden ignorar.
+
+Las salidas del notebook se versionan a propósito (para depuración): haz pull antes de editar y evita editar la misma sección al mismo tiempo para reducir conflictos de merge.
+
+El notebook escribe en un catálogo y un esquema compartidos y hardcodeados; coordina con el equipo antes de ejecutar jobs de streaming a la vez.
+
 ## Stack
 
 PySpark - Delta Lake - Unity Catalog - Databricks - H3 (funciones geoespaciales nativas) - Photon.

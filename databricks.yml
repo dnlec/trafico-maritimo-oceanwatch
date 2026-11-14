@@ -22,18 +22,22 @@ targets:
     # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
     mode: development
     default: true
+    # Shared cluster for the VS Code Databricks extension and Databricks Connect.
+    cluster_id: 1114-011114-9wt67574
     workspace:
-      host: https://dbc-4ea27343-189f.cloud.databricks.com
+      host: https://dbc-b38f0852-ecf9.cloud.databricks.com
     variables:
+      # May not exist in the institutional workspace. The notebook uses hardcoded locations.
       catalog: workspace
       schema: ${workspace.current_user.short_name}
   prod:
     mode: production
     workspace:
-      host: https://dbc-4ea27343-189f.cloud.databricks.com
+      host: https://dbc-b38f0852-ecf9.cloud.databricks.com
       # We explicitly deploy to /Workspace/Users/d.colmenaresm@uniandes.edu.co to make sure we only have a single copy.
       root_path: /Workspace/Users/d.colmenaresm@uniandes.edu.co/.bundle/${bundle.name}/${bundle.target}
     variables:
+      # May not exist in the institutional workspace. The notebook uses hardcoded locations.
       catalog: workspace
       schema: prod
     permissions:
