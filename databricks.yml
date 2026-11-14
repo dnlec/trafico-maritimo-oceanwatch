@@ -23,14 +23,15 @@ targets:
     mode: development
     default: true
     workspace:
-      host: https://dbc-4ea27343-189f.cloud.databricks.com
+      host: https://dbc-b38f0852-ecf9.cloud.databricks.com/
+    cluster_id: 1114-011114-9wt67574
     variables:
       catalog: workspace
       schema: ${workspace.current_user.short_name}
   prod:
     mode: production
     workspace:
-      host: https://dbc-4ea27343-189f.cloud.databricks.com
+      host: https://dbc-b38f0852-ecf9.cloud.databricks.com/
       # We explicitly deploy to /Workspace/Users/d.colmenaresm@uniandes.edu.co to make sure we only have a single copy.
       root_path: /Workspace/Users/d.colmenaresm@uniandes.edu.co/.bundle/${bundle.name}/${bundle.target}
     variables:
