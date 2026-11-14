@@ -11,10 +11,7 @@ Parte 1 del proyecto final.
 - **World Port Index (WPI)**: catálogo de puertos (`UpdatedPub150.csv`) para cruzar las zonas de mayor
 tráfico con puertos conocidos.
 
-
-
 ## Organización en Unity Catalog
-
 
 | Nivel                  | Nombre                                                                                        |
 | ---------------------- | --------------------------------------------------------------------------------------------- |
@@ -22,7 +19,6 @@ tráfico con puertos conocidos.
 | Esquema                | `default`                                                                                     |
 | Tabla (Delta, managed) | `ais_positions_delta` — particionada por `date`, optimizada con `ZORDER (h3_cell)`            |
 | Volumen                | `data` — CSV crudos (`ais_data/`), copia Parquet (`ais_parquet/`) y WPI (`UpdatedPub150.csv`) |
-
 
 La tabla lleva **comentarios** (catálogo, esquema, tabla y cada columna) y **metadatos**
 (`TBLPROPERTIES`: fuente, período, capa, frecuencia, responsable, clasificación) como capa de gobernanza.
@@ -45,37 +41,33 @@ La tabla lleva **comentarios** (catálogo, esquema, tabla y cada columna) y **me
 └── README.md
 ```
 
-> Los datos AIS crudos no se versionan en el repositorio (son ~6 GB); se descargan desde el Requisito 1
-> del notebook directamente al Volume de Databricks.
-
-
+Los datos AIS crudos no se versionan en el repositorio (son ~6 GB); se descargan desde el Requisito 1
+del notebook directamente al Volume de Databricks.
 
 ## Contenido del notebook
 
 El notebook `src/proyecto_ocean_watch.ipynb` está organizado por requisito, con celdas de markdown
 que explican y justifican cada paso:
 
-- **Requisito 1 — Ingesta.** Descarga con reintentos y verificación de integridad de los 7 ZIP, extracción
+- **Requisito 1 Ingesta.** Descarga con reintentos y verificación de integridad de los 7 ZIP, extracción  
 al Volume y lectura como un único DataFrame con esquema explícito (~60.5 M filas).
-- **Requisito 2 — Exploración y perfilamiento.** En 7 pasos: columnas derivadas, volumen y actividad
-diaria, perfilamiento por tipo de buque y dimensiones, diagnóstico de calidad (reglas de validación),
-auditoría de nulos por columna, consistencia de atributos estáticos por MMSI y anomalías adicionales
+- **Requisito 2 Exploración y perfilamiento.** En 7 pasos: columnas derivadas, volumen y actividad  
+diaria, perfilamiento por tipo de buque y dimensiones, diagnóstico de calidad (reglas de validación),  
+auditoría de nulos por columna, consistencia de atributos estáticos por MMSI y anomalías adicionales  
 (posiciones imposibles en el tiempo, `VesselType` fuera de catálogo, `MMSI = 0`). Cierra con hallazgos
 y conclusión orientados a la limpieza de la Entrega 2.
-- **Requisito 3 — Preguntas de negocio.** (a) buques distintos por día (exacto vs `approx_count_distinct`),
+- **Requisito 3 Preguntas de negocio.** (a) buques distintos por día (exacto vs `approx_count_distinct`),
 (b) tipos de buque con más tráfico y velocidad media, (c) top 10 de distancia recorrida (haversine con
 ventana por MMSI), (d) concentración de tráfico en grilla **H3 res. 8** y cruce con el WPI, (e)
 proporción de buques activos los 7 días y ubicación de los "visitantes de un solo día". Las decisiones
 técnicas se justifican con el plan de ejecución real (`explain("formatted")`).
-- **Requisito 4 — Almacenamiento óptimo para un propósito.** Propósito de consulta (día + sector `h3_cell`)
+- **Requisito 4 Almacenamiento óptimo para un propósito.** Propósito de consulta (día + sector `h3_cell`)
 y decisiones de formato/tabla/layout: **CSV vs Parquet vs Delta**, partición por `date`, `OPTIMIZE` +
 `ZORDER (h3_cell)`. Evidencia medida: bytes (6.04 GB → 2.01 GB → 1.48 GB), archivos leídos por la
 consulta (Parquet 6 vs Delta 1) y efecto de `OPTIMIZE` a esta escala, con tabla resumen y conclusión.
-- **Requisito 5 — Gobernanza.** Comentarios y metadatos aplicados sobre los activos en Unity Catalog
+- **Requisito 5 Gobernanza.** Comentarios y metadatos aplicados sobre los activos en Unity Catalog  
 (aplicados directamente en Databricks). El notebook incluye una celda de verificación (`DESCRIBE EXTENDED`)
-  que deja evidencia del comentario y las `TBLPROPERTIES` de la tabla.
-
-
+que deja evidencia del comentario y las `TBLPROPERTIES` de la tabla.
 
 ## Cómo ejecutarlo
 
@@ -86,8 +78,6 @@ archivo, así que se puede leer sin volver a ejecutar.
 
 Los requisitos 2–4 dependen del DataFrame `df_ais` de la celda de lectura. La celda de descarga no
 vuelve a bajar los ZIP si los 7 CSV siguen en el volume.
-
-
 
 ## Stack
 
