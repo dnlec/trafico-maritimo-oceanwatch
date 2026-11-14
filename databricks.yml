@@ -8,11 +8,16 @@ include:
   - resources/*.yml
 
 # Variable declarations. These variables are assigned in the dev/prod targets below.
+# The notebook widgets catalog, schema and volume default to these values.
+# fecha is a notebook widget only (the day to ingest).
+# default is a shared schema, so every object is prefixed oceanwatch_.
 variables:
   catalog:
-    description: The catalog to use
+    description: Shared Unity Catalog for OceanWatch objects
   schema:
-    description: The schema to use
+    description: Shared schema; object names are prefixed with oceanwatch_
+  volume:
+    description: Volume name (not the three-part name) for raw AIS files
 
 targets:
   dev:
@@ -26,8 +31,9 @@ targets:
       host: https://dbc-b38f0852-ecf9.cloud.databricks.com/
     cluster_id: 1114-011114-9wt67574
     variables:
-      catalog: workspace
-      schema: ${workspace.current_user.short_name}
+      catalog: dbr_acad_ingsistemas_mine
+      schema: default
+      volume: oceanwatch_data
   prod:
     mode: production
     workspace:
@@ -35,8 +41,9 @@ targets:
       # We explicitly deploy to /Workspace/Users/d.colmenaresm@uniandes.edu.co to make sure we only have a single copy.
       root_path: /Workspace/Users/d.colmenaresm@uniandes.edu.co/.bundle/${bundle.name}/${bundle.target}
     variables:
-      catalog: workspace
-      schema: prod
+      catalog: dbr_acad_ingsistemas_mine
+      schema: default
+      volume: oceanwatch_data
     permissions:
       - user_name: d.colmenaresm@uniandes.edu.co
         level: CAN_MANAGE
