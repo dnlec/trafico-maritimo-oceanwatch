@@ -28,7 +28,12 @@ La tabla lleva **comentarios** (catálogo, esquema, tabla y cada columna) y **me
 ```
 .
 ├── src/
-│   └── proyecto_ocean_watch.ipynb   # Notebook principal (Requisitos 1–5)
+│   ├── proyecto_ocean_watch.ipynb   # Parte 1 (Requisitos 1–5)
+│   ├── 00_setup.ipynb               # Parte 2: volume, tablas, WPI, permisos
+│   ├── 01_ingesta.ipynb             # Parte 2: zip NOAA del día → landing
+│   ├── 02_bronze.ipynb              # Parte 2: Auto Loader → bronze
+│   ├── 03_silver.ipynb              # Parte 2: reglas de calidad → silver / cuarentena
+│   └── 04_gold.ipynb                # Parte 2: trayectorias, puertos, tráfico
 ├── docs/
 │   ├── Proyecto_Final_..._Parte 1.pdf   # Enunciado del proyecto
 │   └── data-dictionary.pdf              # Diccionario de datos AIS
@@ -82,4 +87,34 @@ vuelve a bajar los ZIP si los 7 CSV siguen en el volume.
 ## Stack
 
 PySpark - Delta Lake - Unity Catalog - Databricks - H3 (funciones geoespaciales nativas) - Photon.
+
+## Parte 2: pipeline
+
+Cinco notebooks en `src/`, pensados para el editor web de Databricks en el cluster shared
+(acceso standard). Los archivos se escriben con Python sobre `/Volumes`. No hay bundle.
+
+| Notebook | Qué hace | Cuándo |
+|---|---|---|
+| `00_setup.ipynb` | Volume, carpetas, tablas, World Port Index y `GRANT` a `mine-group8` | Una vez, a mano |
+| `01_ingesta.ipynb` | Zip NOAA del día `fecha` → `landing/` | Tarea del job |
+| `02_bronze.ipynb` | Auto Loader de `landing/` a bronze, con conteo antes/después | Tarea del job |
+| `03_silver.ipynb` | Reglas de calidad: válidas a silver, el resto a cuarentena | Tarea del job |
+| `04_gold.ipynb` | Trayectorias, presencia en puerto y tráfico celda × hora | Tarea del job |
+
+Antes de `00_setup`, el CSV `UpdatedPub150.csv` tiene que estar en `ref/` del volume
+(o seguir en el volume de la Parte 1, `proyecto_datos.default.data`). El setup lo copia.
+
+Catálogo `dbr_acad_ingsistemas_mine`, esquema `default`, volume `oceanwatch_data`.
+El día entra por el widget `fecha` (`YYYY-MM-DD`).
+
+### Job en la UI
+
+1. Create Job. Cluster: el shared del curso (standard, Unity Catalog).
+2. Cuatro tareas en este orden, cada una un notebook de `src/`: `01_ingesta` → `02_bronze` → `03_silver` → `04_gold`. Cada flecha es "depends on" la anterior.
+3. Job parameter `fecha`. En cada tarea, el parámetro del notebook `fecha` vale `{{job.parameters.fecha}}`.
+4. Schedule diario (por ejemplo 06:00 America/Bogota), cuando el zip de NOAA de ese día ya existe. El valor de `fecha` hay que pasarlo en cada ejecución, o fijarlo en el schedule si el día es siempre ayer.
+5. En cada tarea, Retries en 1 o 2. En Notifications del job, correo al fallar.
+6. Max concurrent runs = 1. Los checkpoints de bronze y silver son únicos: dos ejecuciones a la vez los corrompen.
+
+`00_setup` no va en el job. MLflow y el dashboard quedan para después.
 
