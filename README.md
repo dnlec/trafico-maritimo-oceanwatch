@@ -101,8 +101,8 @@ Los demás lo incluyen con `%run ./_config`. No es una tarea del job.
 | `_config.ipynb` | Constantes y widget `fecha` | Lo incluye cada notebook |
 | `00_setup.ipynb` | Volume, carpetas, tablas, World Port Index y `GRANT` a `mine-group8` | Una vez, a mano |
 | `01_ingesta.ipynb` | Zip NOAA del día `fecha` → `landing/` | Tarea del job |
-| `02_bronze.ipynb` | Auto Loader de `landing/` a bronze, con conteo antes/después | Tarea del job |
-| `03_silver.ipynb` | Reglas de calidad: válidas a silver, el resto a cuarentena | Tarea del job |
+| `02_bronze.ipynb` | Auto Loader hace append del CSV crudo. El checkpoint lee cada archivo una vez | Tarea del job |
+| `03_silver.ipynb` | Quita duplicados `(MMSI, BaseDateTime)` y separa válidas de cuarentena | Tarea del job |
 | `04_gold.ipynb` | Trayectorias, presencia en puerto y tráfico celda × hora | Tarea del job |
 
 `00_setup` copia `UpdatedPub150.csv` desde la raíz del repo (carpeta Git) a `ref/`
@@ -110,6 +110,11 @@ del volume y lo lee desde ahí. El número de puerto del CSV viene como `7950.0`
 
 Catálogo `dbr_acad_ingsistemas_mine`, esquema `default`, volume `oceanwatch_data`.
 El día entra por el widget `fecha` (`YYYY-MM-DD`).
+
+Bronze no deduplica: conserva cada mensaje. Silver hace `dropDuplicates` dentro del
+batch y un `MERGE` solo contra los `fecha_dia` de ese batch. Si silver se creó con
+la columna vieja `fecha`, en `00_setup` está la celda opcional que la borra junto
+con cuarentena y el checkpoint de silver. Bronze no se toca.
 
 ### Job en la UI
 
