@@ -29,6 +29,7 @@ La tabla lleva **comentarios** (catálogo, esquema, tabla y cada columna) y **me
 .
 ├── src/
 │   ├── proyecto_ocean_watch.ipynb   # Parte 1 (Requisitos 1–5)
+│   ├── _config.ipynb                # Parte 2: constantes y widget fecha
 │   ├── 00_setup.ipynb               # Parte 2: volume, tablas, WPI, permisos
 │   ├── 01_ingesta.ipynb             # Parte 2: zip NOAA del día → landing
 │   ├── 02_bronze.ipynb              # Parte 2: Auto Loader → bronze
@@ -90,19 +91,22 @@ PySpark - Delta Lake - Unity Catalog - Databricks - H3 (funciones geoespaciales 
 
 ## Parte 2: pipeline
 
-Cinco notebooks en `src/`, pensados para el editor web de Databricks en el cluster shared
+Notebooks en `src/`, para el editor web de Databricks en el cluster shared
 (acceso standard). Los archivos se escriben con Python sobre `/Volumes`.
+`_config.ipynb` tiene el catálogo, las rutas, los nombres de tabla y el widget `fecha`.
+Los demás lo incluyen con `%run ./_config`. No es una tarea del job.
 
 | Notebook | Qué hace | Cuándo |
 |---|---|---|
+| `_config.ipynb` | Constantes y widget `fecha` | Lo incluye cada notebook |
 | `00_setup.ipynb` | Volume, carpetas, tablas, World Port Index y `GRANT` a `mine-group8` | Una vez, a mano |
 | `01_ingesta.ipynb` | Zip NOAA del día `fecha` → `landing/` | Tarea del job |
 | `02_bronze.ipynb` | Auto Loader de `landing/` a bronze, con conteo antes/después | Tarea del job |
 | `03_silver.ipynb` | Reglas de calidad: válidas a silver, el resto a cuarentena | Tarea del job |
 | `04_gold.ipynb` | Trayectorias, presencia en puerto y tráfico celda × hora | Tarea del job |
 
-Antes de `00_setup`, el CSV `UpdatedPub150.csv` tiene que estar en `ref/` del volume
-(o seguir en el volume de la Parte 1, `proyecto_datos.default.data`). El setup lo copia.
+`00_setup` copia `UpdatedPub150.csv` desde la raíz del repo (carpeta Git) a `ref/`
+del volume y lo lee desde ahí. El número de puerto del CSV viene como `7950.0`.
 
 Catálogo `dbr_acad_ingsistemas_mine`, esquema `default`, volume `oceanwatch_data`.
 El día entra por el widget `fecha` (`YYYY-MM-DD`).
