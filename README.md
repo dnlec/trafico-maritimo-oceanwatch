@@ -91,7 +91,7 @@ PySpark - Delta Lake - Unity Catalog - Databricks - H3 (funciones geoespaciales 
 ## Parte 2: pipeline
 
 Cinco notebooks en `src/`, pensados para el editor web de Databricks en el cluster shared
-(acceso standard). Los archivos se escriben con Python sobre `/Volumes`. No hay bundle.
+(acceso standard). Los archivos se escriben con Python sobre `/Volumes`.
 
 | Notebook | Qué hace | Cuándo |
 |---|---|---|
@@ -110,11 +110,11 @@ El día entra por el widget `fecha` (`YYYY-MM-DD`).
 ### Job en la UI
 
 1. Create Job. Cluster: el shared del curso (standard, Unity Catalog).
-2. Cuatro tareas en este orden, cada una un notebook de `src/`: `01_ingesta` → `02_bronze` → `03_silver` → `04_gold`. Cada flecha es "depends on" la anterior.
+2. Cuatro tareas en este orden, cada una un notebook de `src/`: `01_ingesta` -> `02_bronze` -> `03_silver` -> `04_gold`. Cada tarea depende de la anterior.
 3. Job parameter `fecha`. En cada tarea, el parámetro del notebook `fecha` vale `{{job.parameters.fecha}}`.
 4. Schedule diario (por ejemplo 06:00 America/Bogota), cuando el zip de NOAA de ese día ya existe. El valor de `fecha` hay que pasarlo en cada ejecución, o fijarlo en el schedule si el día es siempre ayer.
-5. En cada tarea, Retries en 1 o 2. En Notifications del job, correo al fallar.
-6. Max concurrent runs = 1. Los checkpoints de bronze y silver son únicos: dos ejecuciones a la vez los corrompen.
+5. En cada tarea, Retries en 1 o 2. Y si falla, se envia un correo, se configura en Notifications del job.
+6. Max concurrent runs = 1. Los checkpoints de bronze y silver son únicos, dos ejecuciones a la vez los corrompen.
 
 `00_setup` no va en el job. MLflow y el dashboard quedan para después.
 
