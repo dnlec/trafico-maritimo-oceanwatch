@@ -112,7 +112,10 @@ Catálogo `dbr_acad_ingsistemas_mine`, esquema `default`, volume `oceanwatch_dat
 El día entra por el widget `fecha` (`YYYY-MM-DD`).
 
 Bronze conserva cada fila, no deduplica. Silver hace `dropDuplicates` dentro del
-batch y un `MERGE` solo contra los `fecha_dia` de ese batch.
+batch y un `MERGE` solo contra los `fecha_dia` de ese batch. En `00_setup` hay una
+celda opcional (`REINICIAR_TODO = True`) que borra todas las tablas `oceanwatch_`,
+el contenido de `checkpoints/` y los CSV de `landing/`. Los zip de `raw_zips/` se
+conservan para no repetir la descarga NOAA.
 
 ### Job en la UI
 
