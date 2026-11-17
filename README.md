@@ -111,10 +111,8 @@ del volume y lo lee desde ahí. El número de puerto del CSV viene como `7950.0`
 Catálogo `dbr_acad_ingsistemas_mine`, esquema `default`, volume `oceanwatch_data`.
 El día entra por el widget `fecha` (`YYYY-MM-DD`).
 
-Bronze no deduplica: conserva cada mensaje. Silver hace `dropDuplicates` dentro del
-batch y un `MERGE` solo contra los `fecha_dia` de ese batch. Si silver se creó con
-la columna vieja `fecha`, en `00_setup` está la celda opcional que la borra junto
-con cuarentena y el checkpoint de silver. Bronze no se toca.
+Bronze conserva cada fila, no deduplica. Silver hace `dropDuplicates` dentro del
+batch y un `MERGE` solo contra los `fecha_dia` de ese batch.
 
 ### Job en la UI
 
