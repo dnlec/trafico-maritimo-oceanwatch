@@ -28,7 +28,13 @@ La tabla lleva **comentarios** (catálogo, esquema, tabla y cada columna) y **me
 ```
 .
 ├── src/
-│   └── proyecto_ocean_watch.ipynb   # Notebook principal (Requisitos 1–5)
+│   ├── proyecto_ocean_watch.ipynb   # Parte 1 (Requisitos 1–5)
+│   ├── _config.ipynb                # Parte 2: constantes y widget fecha
+│   ├── 00_setup.ipynb               # Parte 2: volume, tablas, WPI, permisos
+│   ├── 01_ingesta.ipynb             # Parte 2: zip NOAA del día → landing
+│   ├── 02_bronze.ipynb              # Parte 2: Auto Loader → bronze
+│   ├── 03_silver.ipynb              # Parte 2: reglas de calidad → silver / cuarentena
+│   └── 04_gold.ipynb                # Parte 2: trayectorias, puertos, tráfico
 ├── docs/
 │   ├── Proyecto_Final_..._Parte 1.pdf   # Enunciado del proyecto
 │   └── data-dictionary.pdf              # Diccionario de datos AIS
@@ -82,4 +88,43 @@ vuelve a bajar los ZIP si los 7 CSV siguen en el volume.
 ## Stack
 
 PySpark - Delta Lake - Unity Catalog - Databricks - H3 (funciones geoespaciales nativas) - Photon.
+
+## Parte 2: pipeline
+
+Notebooks en `src/`, para el editor web de Databricks en el cluster shared
+(acceso standard). Los archivos se escriben con Python sobre `/Volumes`.
+`_config.ipynb` tiene el catálogo, las rutas, los nombres de tabla y el widget `fecha`.
+Los demás lo incluyen con `%run ./_config`. No es una tarea del job.
+
+| Notebook | Qué hace | Cuándo |
+|---|---|---|
+| `_config.ipynb` | Constantes y widget `fecha` | Lo incluye cada notebook |
+| `00_setup.ipynb` | Volume, carpetas, tablas, World Port Index y `GRANT` a `mine-group8` | Una vez, a mano |
+| `01_ingesta.ipynb` | Zip NOAA del día `fecha` → `landing/` | Tarea del job |
+| `02_bronze.ipynb` | Auto Loader hace append del CSV crudo. El checkpoint lee cada archivo una vez | Tarea del job |
+| `03_silver.ipynb` | Quita duplicados `(MMSI, BaseDateTime)` y separa válidas de cuarentena | Tarea del job |
+| `04_gold.ipynb` | Trayectorias, presencia en puerto y tráfico celda × hora | Tarea del job |
+
+`00_setup` copia `UpdatedPub150.csv` desde la raíz del repo (carpeta Git) a `ref/`
+del volume y lo lee desde ahí. El número de puerto del CSV viene como `7950.0`.
+
+Catálogo `dbr_acad_ingsistemas_mine`, esquema `default`, volume `oceanwatch_data`.
+El día entra por el widget `fecha` (`YYYY-MM-DD`).
+
+Bronze conserva cada fila, no deduplica. Silver hace `dropDuplicates` dentro del
+batch y un `MERGE` solo contra los `fecha_dia` de ese batch. En `00_setup` hay una
+celda opcional (`REINICIAR_TODO = True`) que borra todas las tablas `oceanwatch_`,
+el contenido de `checkpoints/` y los CSV de `landing/`. Los zip de `raw_zips/` se
+conservan para no repetir la descarga NOAA.
+
+### Job en la UI
+
+1. Create Job. Cluster: el shared del curso (standard, Unity Catalog).
+2. Cuatro tareas en este orden, cada una un notebook de `src/`: `01_ingesta` -> `02_bronze` -> `03_silver` -> `04_gold`. Cada tarea depende de la anterior.
+3. Job parameter `fecha`. En cada tarea, el parámetro del notebook `fecha` vale `{{job.parameters.fecha}}`.
+4. Schedule diario (por ejemplo 06:00 America/Bogota), cuando el zip de NOAA de ese día ya existe. El valor de `fecha` hay que pasarlo en cada ejecución, o fijarlo en el schedule si el día es siempre ayer.
+5. En cada tarea, Retries en 1 o 2. Y si falla, se envia un correo, se configura en Notifications del job.
+6. Max concurrent runs = 1. Los checkpoints de bronze y silver son únicos, dos ejecuciones a la vez los corrompen.
+
+`00_setup` no va en el job. MLflow y el dashboard quedan para después.
 
