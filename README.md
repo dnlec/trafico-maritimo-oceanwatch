@@ -126,5 +126,5 @@ conservan para no repetir la descarga NOAA.
 5. En cada tarea, Retries en 1 o 2. Y si falla, se envia un correo, se configura en Notifications del job.
 6. Max concurrent runs = 1. Los checkpoints de bronze y silver son únicos, dos ejecuciones a la vez los corrompen.
 
-`00_setup` no va en el job. MLflow y el dashboard quedan para después.
+`00_setup` no va en el job.
 
