@@ -1,4 +1,5 @@
-# Automatic Identification System  
+# Automatic Identification System
+
 ## Broadcast Points Data Dictionaries
 
 **Updated:** July 31, 2026
@@ -57,6 +58,6 @@ This data dictionary pertains to point data from 2025 to present.
 | 16 | cargo | Cargo type (see NAIS specification and codes) | 70 | scalar | 1 to 1024* | Y | int32 | 4 |
 | 17 | transceiver | Class of AIS transceiver | A | character | A \| B | Y | string | 2 |
 
-\*Applicable lookup table required
+Applicable lookup table required
 
 **Marine Cadastre**

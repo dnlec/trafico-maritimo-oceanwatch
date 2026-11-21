@@ -1,0 +1,10 @@
+pyspark==4.0.1
+delta-spark==4.0.0
+pandas==2.2.3
+numpy==2.3.5
+pyarrow==19.0.1
+duckdb==1.5.6
+h3==4.5.1
+mlflow==2.22.4
+SQLAlchemy==2.0.58
+scikit-learn==1.8.0

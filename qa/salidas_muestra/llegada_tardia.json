@@ -1,0 +1,23 @@
+{
+  "entorno": "Spark y Delta locales",
+  "fuente_prueba": "Posiciones sintéticas con dos fechas",
+  "fecha_job": "2023-06-08",
+  "posiciones_por_fecha_antes": {
+    "2023-06-08": 1,
+    "2023-06-07": 1
+  },
+  "despues_del_mensaje_tardio": {
+    "2023-06-08": 1,
+    "2023-06-07": 2
+  },
+  "tras_repetir_el_dia": {
+    "2023-06-08": 1,
+    "2023-06-07": 2
+  },
+  "lector_archivos_ensayado": "Structured Streaming, formato CSV",
+  "conteos_archivo_inicial_mismo_checkpoint_reenvio": [
+    1,
+    1,
+    2
+  ]
+}

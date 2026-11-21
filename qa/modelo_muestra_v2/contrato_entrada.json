@@ -1,0 +1,13 @@
+{
+  "variables": [
+    "sog_media",
+    "log_velocidad_tramos",
+    "log_brecha"
+  ],
+  "llave": [
+    "fecha",
+    "MMSI"
+  ],
+  "umbral_alerta": 0.0,
+  "huella": "cb6dede22b7054f27c795b45c3406d8b665857345c865cc861ca6974ce8ff7b3"
+}
