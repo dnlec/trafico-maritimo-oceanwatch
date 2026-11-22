@@ -32,7 +32,7 @@ La tabla lleva **comentarios** (catálogo, esquema, tabla y cada columna) y **me
 ├── src/
 │   ├── proyecto_ocean_watch.ipynb              # Parte 1 (Requisitos 1–5)
 │   ├── _config.ipynb                           # Parte 2. Configuración compartida y fecha AIS
-│   ├── 00_setup.ipynb                          # Volumen, tablas, WPI, máscara de agua y permisos
+│   ├── 00_setup.ipynb                          # Volumen, tablas, WPI y permisos
 │   ├── 01_ingesta.ipynb                        # ZIP diario de NOAA → landing
 │   ├── 02_bronze.ipynb                         # Auto Loader → Bronze
 │   ├── 03_silver.ipynb                         # Calidad → Silver, cuarentena y métricas
@@ -49,7 +49,6 @@ La tabla lleva **comentarios** (catálogo, esquema, tabla y cada columna) y **me
 │   ├── data-dictionary.md
 │   ├── data-dictionary.pdf
 │   ├── Proyecto_Final_2026-20_OceanWatch_AIS - Parte 2.pdf
-│   ├── Proyecto_Final_2026-20_OceanWatch_AIS_Parte_2_1.docx
 │   ├── Guia_OceanWatch.pdf
 │   ├── contrato_oro.md
 │   └── bitacora_entrega2.md
@@ -58,44 +57,11 @@ La tabla lleva **comentarios** (catálogo, esquema, tabla y cada columna) y **me
 │   ├── quality_diagnostics.csv
 │   ├── size_metrics.csv
 │   └── vessel_type_dist.csv
-├── reference/                                  # Cartografía y procedencia de la regla de agua de Silver
-│   ├── agua_ne_v1.csv.gz
-│   ├── construir_mascara.py
-│   ├── descargar_hidrografia.py
-│   └── fuentes.md
-├── qa/                                         # Pruebas locales y resultados de la muestra
-│   ├── Vista_OceanWatch.html
-│   ├── reproducir_muestra.py
-│   ├── requirements-local.txt
-│   ├── salidas_muestra/                        # Resultados tabulares y controles reproducibles
-│   │   ├── anomalias.csv
-│   │   ├── balance.csv
-│   │   ├── cobertura_ml.csv
-│   │   ├── conteos_fuente.json
-│   │   ├── indicadores.csv
-│   │   ├── llegada_tardia.json
-│   │   ├── mapa.csv
-│   │   ├── motivos.csv
-│   │   ├── presencia.csv
-│   │   ├── ranking.csv
-│   │   ├── recuperacion_delta.json
-│   │   └── runs_mlflow_local.csv
-│   └── modelo_muestra_v2/                      # Modelo MLflow de la muestra local
-│       ├── conda.yaml
-│       ├── contrato_entrada.json
-│       ├── input_example.json
-│       ├── MLmodel
-│       ├── model.pkl
-│       ├── python_env.yaml
-│       ├── registered_model_meta
-│       ├── requirements.txt
-│       └── serving_input_example.json
-├── integracion/                                # Respaldo Git, guía del paquete de cambios y huellas
+├── integracion/                                # Guía del paquete de cambios y huellas
 │   ├── Guia_del_ZIP_de_cambios.pdf
-│   ├── OceanWatch_Equipo8.bundle
 │   └── SHA256SUMS.txt
 ├── UpdatedPub150.csv                           # World Port Index
-├── Guía de Ejecución en DataBricks.docx        # Guía paso a paso para ejecutar en Databricks
+├── Guía de Ejecución en DataBricks.md          # Guía paso a paso para ejecutar en Databricks
 ├── .gitignore
 └── README.md
 ```
@@ -146,12 +112,13 @@ PySpark - Delta Lake - Unity Catalog - Databricks - H3 (funciones geoespaciales 
 
 Notebooks en `src/`, para el editor web de Databricks en el cluster shared
 (acceso standard). Los archivos se escriben con Python sobre `/Volumes`.
-`_config.ipynb` tiene el catálogo, las rutas, los nombres de tabla y el widget `fecha`.
-Los demás lo incluyen con `%run ./_config`. No es una tarea del job.
+`_config.ipynb` tiene el catálogo, las rutas y los nombres de tabla.
+Cada notebook crea los widgets `fecha`, `ancla_replay` e `inicio_run` y después hace `%run ./_config`.
+`_config` no es una tarea del job.
 
 | Notebook | Qué hace | Cuándo |
 |---|---|---|
-| `_config.ipynb` | Constantes y widget `fecha` | Lo incluye cada notebook |
+| `_config.ipynb` | Constantes, rutas y la fecha AIS | Lo incluye cada notebook |
 | `00_setup.ipynb` | Volume, carpetas, tablas, World Port Index y `GRANT` a `mine-group8` | Una vez, a mano |
 | `01_ingesta.ipynb` | Zip NOAA del día `fecha` → `landing/` | Tarea del job |
 | `02_bronze.ipynb` | Auto Loader hace append del CSV crudo. El checkpoint lee cada archivo una vez | Tarea del job |
@@ -165,18 +132,18 @@ del volume y lo lee desde ahí. El número de puerto del CSV viene como `7950.0`
 Catálogo `dbr_acad_ingsistemas_mine`, esquema `default`, volume `oceanwatch_data`.
 El día entra por el widget `fecha` (`YYYY-MM-DD`).
 
-Bronze conserva cada fila, no deduplica. Silver comprueba cada mensaje antes de elegir una copia válida por `(MMSI, BaseDateTime)`. Así, si llegan dos copias del mismo buque e instante y una trae coordenadas inválidas, el equipo puede consultar la causa de ese rechazo en cuarentena. Silver ordena las copias válidas dentro de cada lote y usa `MERGE` sobre las fechas afectadas. Entre lotes conserva la primera copia válida confirmada. Cada lote deja su balance en `oceanwatch_metricas_silver_v2`.
+Bronze conserva cada fila, no deduplica. Silver comprueba cada mensaje antes de elegir una copia válida por `(MMSI, BaseDateTime)`. Así, si llegan dos copias del mismo buque e instante y una trae coordenadas inválidas, el equipo puede consultar la causa de ese rechazo en cuarentena. Silver ordena las copias válidas dentro de cada batch y usa `MERGE` sobre las fechas afectadas. Entre batches conserva la primera copia válida confirmada. Cada batch deja su balance en `oceanwatch_metricas_silver_v2`. No hay chequeo de tierra contra mar: el dato NOAA incluye puertos, ríos y los Grandes Lagos.
 
-En la Entrega 2, **`dbr_acad_ingsistemas_mine.default`** contiene el volumen, Bronze, Silver, cuarentena, referencias y métricas. El esquema **`dbr_acad_ingsistemas_mine.oceanwatch_oro_eq8`** contiene las cuatro tablas de consumo. `04_gold` produce las tres primeras. `05_oceanwatch`, en `modo=pipeline`, usa trayectorias para producir la cuarta. El número `04` en el nombre de un notebook indica su lugar en la secuencia. El **punto 4 del enunciado** es el tablero que se publica desde `05_oceanwatch`.
+En la Entrega 2 todo queda en **`dbr_acad_ingsistemas_mine.default`**: volumen, Bronze, Silver, cuarentena, métricas, controles, las cuatro tablas de oro y el modelo `oceanwatch_detector_velocidad`. `04_gold` produce las tres primeras tablas de oro. `05_oceanwatch`, en `modo=pipeline`, produce las anomalías. El número `04` en el nombre de un notebook indica su lugar en la secuencia. El **punto 4 del enunciado** es el tablero que se publica desde `05_oceanwatch`.
 
-**De dónde salen los datos al ejecutar el job.** `01_ingesta` solicita a NOAA el ZIP real de la fecha indicada. Para el 9 de junio de 2023 busca `AIS_2023_06_09.zip`. Si ya existe una copia íntegra en `raw_zips/` del volumen, la reutiliza. El CSV se publica completo en `landing/` y `02_bronze` procesa los archivos nuevos según su checkpoint. Para incorporar otro día, se elige una fecha con archivo disponible en NOAA que aún no se haya procesado. Las fechas de junio de 2023 reproducen el archivo histórico. Los CSV y el HTML de `qa/` documentan una prueba local con una muestra. Las consultas del tablero leen las tablas de oro que genera el job. [Fuente AIS y documentación de Marine Cadastre](https://hub.marinecadastre.gov/pages/vesseltraffic).
+**De dónde salen los datos al ejecutar el job.** `01_ingesta` solicita a NOAA el ZIP real de la fecha indicada. Para el 9 de junio de 2023 busca `AIS_2023_06_09.zip`. Si ya existe una copia íntegra en `raw_zips/` del volumen, la reutiliza. El CSV se publica completo en `landing/` y `02_bronze` procesa los archivos nuevos según su checkpoint. Para incorporar otro día, se elige una fecha con archivo disponible en NOAA que aún no se haya procesado. Las fechas de junio de 2023 reproducen el archivo histórico. Las consultas del tablero leen las tablas de oro que genera el job. [Fuente AIS y documentación de Marine Cadastre](https://hub.marinecadastre.gov/pages/vesseltraffic).
 
 ### Job en la UI
 
-Estas instrucciones usan el job compartido **Orquestracion OceanWatch** y el cómputo **clase14-equipo8**. Los pasos 1 a 4 dejan datos en oro. Con una fecha ya procesada por las cinco tareas, se puede continuar en el paso 5. El equipo también tiene una [guía de ejecución en Word](Gui%CC%81a%20de%20Ejecucio%CC%81n%20en%20DataBricks.docx).
+Estas instrucciones usan el job compartido **Orquestracion OceanWatch** y el cómputo **clase14-equipo8**. Los pasos 1 a 4 dejan datos en oro. Con una fecha ya procesada por las cinco tareas, se puede continuar en el paso 5. El equipo también tiene una [guía de ejecución](Gu%C3%ADa%20de%20Ejecuci%C3%B3n%20en%20DataBricks.md).
 
 1. **Importar el proyecto y conectar el cómputo.** En el workspace institucional **DBR-ACAD-INGSISTEMAS-MINE**, abre tu carpeta personal en **Workspace → Users** e importa el ZIP. Localiza la carpeta que contiene `src/`, `dashboards/` y `UpdatedPub150.csv`. En el menú de `src/` selecciona **Copy path**. Comprueba que `_config` y los notebooks `00` a `05` están juntos. En **Compute**, inicia `clase14-equipo8` si está detenido y espera a **Running**. Abre `src/00_setup` y selecciónalo en la barra de cómputo. Databricks puede mostrar los notebooks sin la extensión `.ipynb`.
-2. **Ejecutar la preparación.** En `00_setup`, pulsa **Run all** con una identidad que pueda crear los objetos y aplicar los permisos. La celda del WPI debe imprimir `Puertos 3807` con el CSV incluido. La celda de la máscara comprueba la huella del archivo y las 64.800 teselas. Si falta una referencia, abre **Catalog → dbr_acad_ingsistemas_mine → default → Volumes → oceanwatch_data → ref → Upload**. Desde la copia descomprimida del proyecto, sube `UpdatedPub150.csv` de la raíz o `reference/agua_ne_v1.csv.gz`, según indique el error. Conserva los nombres y la extensión `.gz` de la máscara. Vuelve a ejecutar `00_setup`.
+2. **Ejecutar la preparación.** En `00_setup`, pulsa **Run all** con una identidad que pueda crear los objetos y aplicar los permisos. La celda del WPI debe imprimir `Puertos 3807` con el CSV incluido. Si falta el CSV, abre **Catalog → dbr_acad_ingsistemas_mine → default → Volumes → oceanwatch_data → ref → Upload** y sube `UpdatedPub150.csv` desde la raíz del proyecto. Vuelve a ejecutar `00_setup`.
 3. **Vincular el job a esta copia.** Abre `src/05_oceanwatch`, conéctalo a `clase14-equipo8` y ejecuta las tres primeras **celdas de código** en orden. La primera lee la fecha, la segunda ejecuta `%run ./_config` y la tercera crea el selector `modo`. Selecciona `modo=configurar_job`, deja una fecha explícita como `2023-06-08`, pega la ruta de `src/` en `ruta_src` y pulsa **Run all**. Este modo actualiza el job compartido que ya contiene las tareas `01` a `04`. En **Jobs & Pipelines → Orquestracion OceanWatch → Tasks**, comprueba las rutas, el cómputo y la secuencia `01_ingesta → 02_bronze → 03_silver → 04_gold → 05_oceanwatch`. La quinta tarea debe tener `modo=pipeline`. Si todas las tareas ya apuntan a la copia correcta, continúa con el paso 4.
 4. **Procesar las fechas en orden.** En el menú junto a **Run now**, elige la opción que permite cambiar los parámetros de la ejecución. Selecciona las cinco tareas, escribe `2023-06-07` en `fecha` y lanza el job. Espera a que las cinco finalicen con éxito. Repite con `2023-06-08` y luego con `2023-06-09`. Así el modelo tiene días anteriores para evaluar el 9. Si se quiere incorporar al catálogo institucional todo el período de la primera entrega, comienza por el 1 de junio, avanza un día por ejecución hasta el 7 y continúa con los siguientes. La fecha corresponde al día de las señales en UTC.
 5. **Publicar la consola institucional.** Usa la última fecha procesada, el JSON institucional y un SQL warehouse del equipo. [Punto 4. Consola de visualización](#punto-4-consola-de-visualización).
@@ -201,11 +168,11 @@ El tablero institucional **OceanWatch · Operación marítima** consulta las cua
 | Buques en puerto | Para cada puerto y MMSI muestra la primera y la última señal UTC y cuántas se observaron en la vecindad del puerto. La presencia se define por la celda H3 de resolución 7 del puerto y su primer anillo. |
 | Anomalías del día | Ordena las alertas de mayor a menor `score`. Permite comparar la velocidad AIS con la estimada por los tramos y consultar la versión del modelo. |
 
-Para la sustentación, conserva el enlace **publicado** y una captura con el día visible. Para revisar el diseño antes de conectarse al workspace, el equipo puede abrir la [vista HTML de la muestra del 9 de junio](qa/Vista_OceanWatch.html).
+Para la sustentación, conserva el enlace **publicado** y una captura con el día visible.
 
 ### Punto 5. Gobernanza
 
-Los consumidores institucionales consultan `dbr_acad_ingsistemas_mine.oceanwatch_oro_eq8`. El responsable operativo es `mine-group8`. El contrato documenta fuentes, columnas, tipos, unidades, valores nulos, controles de calidad, periodicidad y reglas para cambiar los productos. [Contrato de datos de la capa oro](docs/contrato_oro.md).
+Los consumidores institucionales consultan `dbr_acad_ingsistemas_mine.default`. El responsable operativo es `mine-group8`. Los mismos privilegios los tienen `h.benitez@uniandes.edu.co` y `l.galvan@uniandes.edu.co`. El contrato documenta fuentes, columnas, tipos, unidades, valores nulos, controles de calidad, periodicidad y reglas para cambiar los productos. [Contrato de datos de la capa oro](docs/contrato_oro.md).
 
 | Tabla de oro | Qué representa una fila | Llave |
 |---|---|---|
@@ -215,7 +182,7 @@ Los consumidores institucionales consultan `dbr_acad_ingsistemas_mine.oceanwatch
 | `oceanwatch_gold_anomalias` | Estado de evaluación de velocidad de un buque durante el día | `fecha, MMSI` |
 
 1. **Aplicar y revisar permisos.** Con una identidad facultada para administrar estos objetos, abre `05`, selecciona `modo=gobernanza` y escribe en `grupo_lectura` el nombre real del grupo analítico acordado por el equipo, distinto de `mine-group8`. Pulsa **Run all**. El notebook concede a ese grupo `USE CATALOG`, `USE SCHEMA` y `SELECT` sobre las cuatro tablas de oro. Con el campo vacío, actualiza los comentarios y las propiedades y muestra los permisos existentes. Revisa los resultados de `SHOW GRANTS` y los permisos heredados del grupo lector. Para abrir la consola publicada con sus propias credenciales, el lector también necesita **CAN VIEW** en el tablero y **CAN USE** en el warehouse.
-2. **Seguir el linaje observado.** Después de un job exitoso, abre **Catalog → dbr_acad_ingsistemas_mine → oceanwatch_oro_eq8**, elige una tabla y entra a **Lineage**. En presencia portuaria, sigue las entradas de Silver y del World Port Index. En anomalías, sigue la entrada de trayectorias. Guarda una captura donde se lean los nombres de origen y destino. El contrato también incluye el diagrama de dependencias del proyecto.
+2. **Seguir el linaje observado.** Después de un job exitoso, abre **Catalog → dbr_acad_ingsistemas_mine → default**, elige una tabla de oro y entra a **Lineage**. En presencia portuaria, sigue las entradas de Silver y del World Port Index. En anomalías, sigue la entrada de trayectorias. Guarda una captura donde se lean los nombres de origen y destino. El contrato también incluye el diagrama de dependencias del proyecto.
 3. **Conciliar la jornada.** En `05` selecciona `modo=verificar`, indica la misma `fecha` y pulsa **Run all**. Debe aparecer `plata = posiciones en trayectorias = tráfico`. Se comprueban las llaves, el balance de Silver y que cada buque con trayectoria tenga una fila de evaluación. También se consulta `system.access.table_lineage` cuando la identidad tiene acceso. La salida deja el archivo `verificacion.json` en `/Volumes/dbr_acad_ingsistemas_mine/default/oceanwatch_data/evidencias/<fecha>/`. Allí quedan los conteos, el estado de la consulta de linaje y las ejecuciones recientes del job.
 
 ### Punto 6. Anomalías de velocidad con MLflow
@@ -226,9 +193,9 @@ El modelo **Isolation Forest** aprende de buques-día elegibles de los **14 día
 
 1. **Ejecutar el modelo.** Al procesar un día con el job, la quinta tarea ya ejecuta `05` en `modo=pipeline`. Para repetir esa tarea manualmente sobre un día que `04_gold` ya cerró, selecciona `modo=pipeline`, escribe la fecha y pulsa **Run all**. Si ni los datos ni el historial pertinente cambiaron, una repetición puede informar `Fechas de ML actualizadas: 0`.
 2. **Revisar la cobertura.** En `modo=verificar`, el resumen agrupa buques y alertas por `estado`, `modelo_version` y `run_id`. `evaluado` indica que hay puntuación. `traza_insuficiente` indica que faltan observaciones o duración para estimar la velocidad. `sin_historial` indica que la traza es utilizable, pero aún faltan ejemplos anteriores para entrenar. En estos dos últimos estados la alerta queda nula. Por eso el tablero muestra por separado los buques distintos y los evaluados.
-3. **Seguir una alerta hasta el experimento.** En el tablero, anota el `MMSI`, la fecha y `modelo_version`. Busca esa fila en `oceanwatch_gold_anomalias` y copia su `run_id`. En **Experiments**, abre `OceanWatch_eq8_velocidad` del usuario que ejecutó la tarea. El run de entrenamiento guarda variables, parámetros y firma del modelo. El run de evaluación temporal registra cobertura, alertas del modelo y resultados de la regla de referencia. En **Catalog → dbr_acad_ingsistemas_mine → oceanwatch_oro_eq8 → oceanwatch_detector_velocidad**, abre la versión anotada. Conserva el enlace al run y a esa versión para la sustentación.
+3. **Seguir una alerta hasta el experimento.** En el tablero, anota el `MMSI`, la fecha y `modelo_version`. Busca esa fila en `oceanwatch_gold_anomalias` y copia su `run_id`. En **Experiments**, abre `/Shared/OceanWatch_eq8_velocidad`. El run de entrenamiento guarda variables, parámetros y firma del modelo. El run de evaluación temporal registra cobertura, alertas del modelo y resultados de la regla de referencia. En **Catalog → dbr_acad_ingsistemas_mine → default → oceanwatch_detector_velocidad**, abre la versión anotada. Conserva el enlace al run y a esa versión para la sustentación.
 
-Como referencia para interpretar la salida, la **muestra local** del 9 de junio de 2023 contiene 171.116 posiciones válidas y 479 buques. Se evaluaron 460 y el modelo señaló 11. La ejecución institucional procesa los archivos diarios completos y produce sus propios conteos y versiones. [Indicadores de la muestra](qa/salidas_muestra/indicadores.csv) · [Cobertura por estado y versión](qa/salidas_muestra/cobertura_ml.csv).
+La ejecución institucional procesa los archivos diarios completos y produce sus propios conteos y versiones.
 
 ### Bono. Delta Sharing en Free Edition
 
@@ -242,8 +209,8 @@ En el bono intervienen dos workspaces. El institucional **provee** las cuatro ta
 
 ### Documentación y evidencias de la Entrega 2
 
-- **Qué pide el curso.** El PDF reúne los requisitos, sus porcentajes y las condiciones del bono. El Word complementario identifica la fuente AIS y los campos de referencia. [Enunciado de la Entrega 2](docs/Proyecto_Final_2026-20_OceanWatch_AIS%20-%20Parte%202.pdf) · [Documento complementario](docs/Proyecto_Final_2026-20_OceanWatch_AIS_Parte_2_1.docx).
+- **Qué pide el curso.** El PDF reúne los requisitos, sus porcentajes y las condiciones del bono. [Enunciado de la Entrega 2](docs/Proyecto_Final_2026-20_OceanWatch_AIS%20-%20Parte%202.pdf).
 - **Qué cambió y cómo sustentarlo.** La bitácora relaciona cada requisito con su implementación, documenta decisiones sobre calidad y llegadas tardías y propone un recorrido de sustentación. La guía PDF recoge la secuencia de demostración del equipo. Su paso «Aplicar el incremento al repositorio» ya está incorporado en este ZIP completo. El primer notebook que se ejecuta es `00_setup`. [Bitácora de la Entrega 2](docs/bitacora_entrega2.md) · [Guía OceanWatch](docs/Guia_OceanWatch.pdf).
-- **Qué se puede revisar fuera de Databricks.** En `qa/` están el procedimiento de reproducción, el modelo MLflow exportado y los resultados por fecha de la muestra. Las evidencias del workspace que presenta el equipo se obtienen en sus propias ejecuciones del job, la publicación de los tableros, los permisos y el registro institucional del modelo. [Reproducción de la muestra](qa/reproducir_muestra.py) · [Salidas de la muestra](qa/salidas_muestra/).
+- **Qué se revisa en Databricks.** Las evidencias salen de la ejecución del job, la publicación de los tableros, los permisos y el registro institucional del modelo.
 
 El inventario [SHA256SUMS.txt](integracion/SHA256SUMS.txt) contiene las huellas del paquete previo a esta actualización del README.

@@ -6,7 +6,7 @@
 
 3. **Enciende la máquina del equipo.** En **Compute** , abre `clase14-equipo8` , pulsa **Start** si está detenida y espera a que diga **Running** . Vuelve a `src/00_setup` y selecciona ese mismo cómputo en la barra superior del notebook. 
 
-4. **Ejecuta** **`00_setup` una vez.** Pulsa **Run all** . La celda del World Port Index debe mostrar **`Puertos 3807`** y la última celda debe terminar correctamente. Si aparece un error indicando que falta el WPI o la máscara de agua, el paso 2 del README indica qué dos archivos subir al volumen y dónde ponerlos. 
+4. **Ejecuta** **`00_setup` una vez.** Pulsa **Run all** . La celda del World Port Index debe mostrar **`Puertos 3807`** y la última celda debe terminar correctamente. Si falta el CSV del WPI, el paso 2 del README indica subirlo al volume `ref/`. 
 
 # **2. Configurar el job y procesar los datos** 
 
@@ -14,7 +14,7 @@
 
 6. **Ejecuta el primer día.** Abre **Jobs & Pipelines → Orquestracion OceanWatch** . Junto a **Run now** , pulsa la flecha y elige **Run now with different settings** o **Run now with different parameters** . Deja seleccionadas las cinco tareas, escribe **`2023-06-07`** en `fecha` y pulsa **Run** . Espera a que las cinco terminen en **Succeeded** . 
 
-7. **Repite para los otros dos días.** Lanza **`2023-06-08`** , espera a que termine y luego lanza **`202306-09`** . El job ejecuta automáticamente `01 → 02 → 03 → 04 → 05` para cada fecha. El orden proporciona historia al modelo antes de evaluar el último día. 
+7. **Repite para los otros dos días.** Lanza **`2023-06-08`** , espera a que termine y luego lanza **`2023-06-09`** . El job ejecuta automáticamente `01 → 02 → 03 → 04 → 05` para cada fecha. El orden proporciona historia al modelo antes de evaluar el último día. 
 
 # **3. Abrir el tablero y verificar la entrega** 
 
@@ -22,7 +22,7 @@
 
 9. **Comprueba que las cifras cuadran.** En el mismo notebook, cambia a **`modo = verificar`** , conserva **`fecha = 2023-06-09`** y pulsa **Run all** . Debe aparecer **`plata = posiciones en trayectorias = tráfico`** . El resultado queda guardado en `oceanwatch_data/evidencias/2023-06-09/verificacion.json` . 
 
-10. **Revisa gobierno y ML.** Ejecuta **`modo = gobernanza`** con el nombre del grupo lector acordado por el equipo. En **Catalog** , abre una tabla de oro y revisa **Lineage** . Para ML, busca el experimento `OceanWatch_eq8_velocidad` y el modelo `oceanwatch_detector_velocidad` en el esquema `oceanwatch_oro_eq8` . Para acreditar la programación, guarda además un run exitoso disparado por el calendario, identificado como **`PERIODIC`** . 
+10. **Revisa gobierno y ML.** Ejecuta **`modo = gobernanza`** con el nombre del grupo lector acordado por el equipo. En **Catalog** , abre una tabla de oro y revisa **Lineage** . Para ML, abre el experimento `/Shared/OceanWatch_eq8_velocidad` y el modelo `oceanwatch_detector_velocidad` en el esquema `default` . Para acreditar la programación, guarda además un run exitoso disparado por el calendario, identificado como **`PERIODIC`** . 
 
 11. **Ejecuta el bono desde Free Edition.** En el workspace institucional, corre 05 con **`modo = compartir`** y **`fecha = 2023-06-09`** . Luego sigue el **paso 7 del README** en el segundo workspace con `free/06_consumo_free.ipynb` . La confirmación que debes obtener es **`Las cuatro tablas coinciden entre los dos workspaces`** , junto con el enlace al tablero publicado desde Free. 
 

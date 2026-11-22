@@ -1,7 +1,0 @@
-fecha,estado,modelo_version,run_id,buques,alertas
-2023-06-07,sin_historial,,,423,0
-2023-06-07,traza_insuficiente,,,16,0
-2023-06-08,evaluado,1,cee84083a7df483ab79c80de8238a71f,439,13
-2023-06-08,traza_insuficiente,1,cee84083a7df483ab79c80de8238a71f,16,0
-2023-06-09,evaluado,2,a586c20b6cbe47ffbe6bb9c905aacd43,460,11
-2023-06-09,traza_insuficiente,2,a586c20b6cbe47ffbe6bb9c905aacd43,19,0
