@@ -10,7 +10,7 @@
 
 # **2. Configurar el job y procesar los datos** 
 
-5. **Abre** **`05_oceanwatch` y conéctalo a** **`clase14-equipo8` .** La primera vez, ejecuta **solo las tres primeras celdas de código** , una por una con ▶. La segunda contiene `%run ./_config` y la tercera crea el selector `modo` . Cuando aparezcan los controles, elige **`modo = configurar_job`** , pega en **`ruta_src`** la ruta copiada en el paso 2 y pulsa **Run all** . Así el job compartido apunta a los notebooks que acabas de importar. 
+5. **Arma el job en la interfaz.** Abre **Jobs & Pipelines → Orquestracion OceanWatch** . El cómputo de cada tarea es `clase14-equipo8` . Agrega, en orden, `01_ingesta` , `02_bronze` , `03_silver` , `04_gold` y `05_oceanwatch` . Cada una depende de la anterior. En las cinco, `fecha` = `{{job.parameters.fecha}}` , `ancla_replay` = `{{job.parameters.ancla_replay}}` e `inicio_run` = `{{job.start_time.iso_date}}` . En la tarea 05 agrega `modo=pipeline` . Parámetros del job: `fecha=AUTO` y `ancla_replay` con el día en que empieza el replay. Dos reintentos por tarea, 60 segundos de espera, una ejecución a la vez. Horario `0 0 6 * * ?` en `America/Bogota` , activo. Correo al fallar en **Notifications** . 
 
 6. **Ejecuta el primer día.** Abre **Jobs & Pipelines → Orquestracion OceanWatch** . Junto a **Run now** , pulsa la flecha y elige **Run now with different settings** o **Run now with different parameters** . Deja seleccionadas las cinco tareas, escribe **`2023-06-07`** en `fecha` y pulsa **Run** . Espera a que las cinco terminen en **Succeeded** . 
 
@@ -18,7 +18,7 @@
 
 # **3. Abrir el tablero y verificar la entrega** 
 
-8. **Publica el punto 4.** En **SQL Warehouses** , abre el warehouse que usa tu equipo. En **Connection details → HTTP path** , copia el identificador que aparece después de `/warehouses/` . Vuelve a `05_oceanwatch` , selecciona **`modo = tablero`** , escribe **`fecha = 2023-06-09`** , pega el ID en `warehouse_id` y la ruta de `dashboards/OceanWatch_Institucional.lvdash.json` en `ruta_dashboard` . Pulsa **Run all** . Abre el enlace **`Tablero publicado`** y selecciona **9 de junio de 2023** también en el filtro del tablero. 
+8. **Publica el punto 4.** En `00_setup` ejecuta la celda de tablas para que `oceanwatch_gold_presencia_puertos` tenga la columna `numero_puerto` . Abre **Dashboards** , elige **Import** y selecciona `dashboards/OceanWatch_Institucional.lvdash.json` . Asigna el SQL warehouse y pulsa **Publish** . Abre el tablero y selecciona **9 de junio de 2023** en **Día AIS · UTC** . 
 
 9. **Comprueba que las cifras cuadran.** En el mismo notebook, cambia a **`modo = verificar`** , conserva **`fecha = 2023-06-09`** y pulsa **Run all** . Debe aparecer **`plata = posiciones en trayectorias = tráfico`** . El resultado queda guardado en `oceanwatch_data/evidencias/2023-06-09/verificacion.json` . 
 

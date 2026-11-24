@@ -68,8 +68,8 @@ Se evalúan anomalías de velocidad dentro de las posiciones aceptadas. Las infr
 
 | Identidad | Alcance | Privilegios |
 | --- | --- | --- |
-| Operador del job, `mine-group8`, `h.benitez@uniandes.edu.co`, `l.galvan@uniandes.edu.co` | Catálogo, esquema `default`, volume, tablas y modelo | USE CATALOG, USE SCHEMA, lectura y escritura del volume, SELECT y MODIFY en las tablas, CREATE MODEL en el esquema y EXECUTE en `oceanwatch_detector_velocidad`. |
-| Grupo analítico institucional existente | Catálogo, esquema `default` y las cuatro tablas de oro | USE CATALOG, USE SCHEMA y SELECT en cada producto. El propietario indica el principal real en `grupo_lectura`. Para el tablero publicado con credenciales del lector se requiere también CAN VIEW en el tablero y CAN USE en el warehouse. |
+| Operador del job, `mine-group8`, `h.benitez@uniandes.edu.co`, `l.galvan@uniandes.edu.co` | Volume, tablas y modelo | Lectura y escritura del volume, SELECT y MODIFY en las tablas, EXECUTE en `oceanwatch_detector_velocidad` cuando el modelo ya existe. El catálogo y el esquema `default` no se administran desde este proyecto. |
+| Grupo analítico institucional existente | Cuatro tablas de oro | SELECT en cada producto, indicado en `grupo_lectura`. El uso del catálogo y del esquema viene del curso. Para el tablero publicado con credenciales del lector se requiere también CAN VIEW en el tablero y CAN USE en el warehouse. |
 | Destinatario `oceanwatch_eq8_free` | Share de las cuatro tablas | SELECT ON SHARE. El perfil vincula un catálogo en el workspace receptor. |
 
 Revisar grants heredados al demostrar solo lectura. Un integrante que además pertenece a ingeniería puede tener permisos adicionales. Las cuentas individuales del setup original se conservan para la operación del equipo.
