@@ -8,9 +8,9 @@ Los productos son tablas Delta administradas y particionadas por `fecha`. Una fe
 
 | Tabla | Llave y unidad | Fuente directa | Consumidor |
 | --- | --- | --- | --- |
-| `oceanwatch_gold_trayectorias` | `fecha, MMSI` · un buque al día | Silver v2 | KPI de buques y modelo de velocidad |
-| `oceanwatch_gold_presencia_puertos` | `fecha, numero_puerto, MMSI` · presencia observada | Silver v2 y World Port Index | Ranking y lista de buques |
-| `oceanwatch_gold_trafico_celda_hora` | `fecha, hora, h3_cell` · celda H3 y hora UTC | Silver v2 | Mapa de intensidad |
+| `oceanwatch_gold_trayectorias` | `fecha, MMSI` · un buque al día | Silver | KPI de buques y modelo de velocidad |
+| `oceanwatch_gold_presencia_puertos` | `fecha, numero_puerto, MMSI` · presencia observada | Silver y World Port Index | Ranking y lista de buques |
+| `oceanwatch_gold_trafico_celda_hora` | `fecha, hora, h3_cell` · celda H3 y hora UTC | Silver | Mapa de intensidad |
 | `oceanwatch_gold_anomalias` | `fecha, MMSI` · evaluación diaria | Trayectorias, historial anterior y versión MLflow | Cobertura, alertas y trazabilidad |
 
 ## Diccionario
@@ -58,9 +58,9 @@ Se evalúan anomalías de velocidad dentro de las posiciones aceptadas. Las infr
 ## Calidad, periodicidad y evolución
 
 - Bronze recibe el CSV histórico diario mediante Auto Loader, conserva la procedencia y acepta solo apéndices. La publicación de cada archivo termina antes del arranque de Bronze. Se admite una sola ejecución concurrente.
-- Silver evalúa todas las copias antes de elegir una válida por `MMSI, BaseDateTime`. Se prioriza por procedencia y contenido dentro del batch. Una versión válida confirmada en un batch anterior queda como registro canónico. Se registra el balance de cada batch y se preserva cada rechazo con sus causas.
+- Silver evalúa todas las copias antes de elegir una válida por `MMSI, BaseDateTime`. Dentro del batch se conserva una copia válida. Una versión válida confirmada en un batch anterior queda como registro canónico. Se registra el balance de cada batch y se preserva cada rechazo con sus causas.
 - No hay chequeo de tierra contra mar. El dato NOAA incluye puertos, ríos y los Grandes Lagos, y un mapa de tierra grueso marcaría tráfico real como si estuviera en tierra. La compuerta mira el rango global, el par `(0, 0)`, SOG y COG.
-- En 04 el marcador `oceanwatch_control_oro_v2` se confirma tras las tres escrituras. Una llegada tardía en Silver vuelve a abrir el día afectado hasta la fecha pedida. En 05 la firma de las revisiones de los últimos 14 días y del día puntuado identifica qué resultados de ML requieren actualización.
+- En 04 el marcador `oceanwatch_control_oro` se confirma tras las tres escrituras. Una llegada tardía en Silver vuelve a abrir el día afectado hasta la fecha pedida. En 05 la firma de las revisiones de los últimos 14 días y del día puntuado identifica qué resultados de ML requieren actualización.
 - El job diario a las 06:00 de Bogotá hace un replay del archivo histórico. La primera fecha del replay automático es 2023-06-08. El parámetro explícito sirve para un backfill. Registrar la duración en Runs, según el cómputo y el corpus usados.
 - Una columna opcional nueva necesita descripción y una prueba de compatibilidad de los dos tableros. Un cambio en llave, unidad, esquema estructural o definición del score requiere una versión mayor y reprocesamiento explícito.
 

@@ -43,6 +43,6 @@ En un ensayo adicional de Spark y Delta, dos días partieron de una posición ca
 
 ## Sustentación del equipo
 
-1. Una persona abre el historial del job, recorre el DAG y demuestra qué sucede al repetir un archivo. Otra reproduce el ensayo de caída y explica cómo se reconcilia el microbatch.
+1. Una persona abre el historial del job, recorre el DAG y demuestra qué sucede al repetir un archivo. Otra reproduce el ensayo de caída y explica cómo se reconcilia el batch.
 2. La tercera elige una fecha y un puerto, muestra los buques observados y abre una alerta. El equipo identifica las dos velocidades del caso y su versión de modelo.
 3. Intercambiar los roles para explicar el contrato y comprobar las huellas en Free. Cada integrante debe poder recorrer todo el flujo. Conservar los enlaces y capturas obtenidos por el propio equipo para la entrega en Bloque Neón.
