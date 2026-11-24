@@ -35,7 +35,15 @@
 
 Spark local procesó una muestra determinista por buque sobre los archivos nacionales completos del 7 al 9 de junio. Se seleccionaron los MMSI cuyo primer byte de MD5 era inferior a 8, conservando todos sus mensajes. Los tres ZIP contenían 26.623.294 filas en total. En la muestra, 507.084 posiciones pasaron a Silver, 313.965 filas llegaron a cuarentena y 15 fueron duplicados válidos. La suma es 821.064. Los totales de esta prueba describen la muestra. La ejecución del equipo procesará el universo de cada archivo.
 
-El 9 de junio, en una muestra local que ya no está en el repositorio, 460 de 479 buques tenían trayectoria suficiente. El detector señaló 11, la regla base señaló 7 y los siete coincidieron con el detector. La tasa de alertas del modelo entre los evaluados fue 2,39 %. El 7 fue el arranque sin historia previa de la prueba. No hay etiquetas confirmadas que permitan calcular precisión o exhaustividad. La evidencia de la entrega es el experimento `/Shared/OceanWatch_eq8_velocidad` y el modelo en `default`.
+| Fecha UTC | CSV completo | Muestra | Silver | Cuarentena | Duplicados válidos |
+| --- | --- | --- | --- | --- | --- |
+| 2023-06-07 | 8.911.726 | 276.544 | 167.996 | 108.541 | 7 |
+| 2023-06-08 | 8.920.444 | 275.013 | 167.972 | 107.038 | 3 |
+| 2023-06-09 | 8.791.124 | 269.507 | 171.116 | 98.386 | 5 |
+
+Cada día, la suma de posiciones en trayectorias y en tráfico coincidió con silver, y las cuatro llaves de oro fueron únicas. En el ensayo de reintento, la excepción se lanzó después de escribir silver, cuarentena y métricas, y Spark retomó el mismo checkpoint. El primer batch, al repetirse, dejó 1 fila nueva, 1 duplicado dentro del batch y 3 rechazos sobre 5 de entrada. El reenvío posterior no agregó filas nuevas. Quedaron una posición válida, tres rechazos y una fila de métricas por batch.
+
+El 8 de junio la muestra evaluó 439 de 455 buques: 13 alertas del modelo, 11 de la regla P99 y 8 en común. El 9 de junio, 460 de 479 buques tenían trayectoria suficiente. El detector señaló 11, la regla base señaló 7 y los siete coincidieron con el detector. La tasa de alertas del modelo entre los evaluados fue 2,39 %. El 7 fue el arranque sin historia previa de la prueba y no evaluó buques. No hay etiquetas confirmadas que permitan calcular precisión o exhaustividad. La evidencia de la entrega es el experimento `/Shared/OceanWatch_eq8_velocidad` y el modelo en `default`. Una segunda ejecución del mismo flujo actualizó cero fechas y dejó el registro local en dos versiones.
 
 En un ensayo adicional de Spark y Delta, dos días partieron de una posición cada uno. Llegó una segunda posición al día anterior. Al procesar el día del job se reabrió esa partición y quedó en dos posiciones, mientras la otra quedó en una. Al repetir la tarea ambas conservaron sus conteos. El checkpoint de bronze conserva un archivo ya leído y vuelve a leer el mismo contenido solo si llega con otro nombre.
 

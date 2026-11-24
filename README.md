@@ -54,9 +54,6 @@ La tabla lleva **comentarios** (catálogo, esquema, tabla y cada columna) y **me
 │   ├── quality_diagnostics.csv
 │   ├── size_metrics.csv
 │   └── vessel_type_dist.csv
-├── integracion/                                # Guía del paquete de cambios y huellas
-│   ├── Guia_del_ZIP_de_cambios.pdf
-│   └── SHA256SUMS.txt
 ├── UpdatedPub150.csv                           # World Port Index
 ├── Guía de Ejecución en DataBricks.md          # Guía paso a paso para ejecutar en Databricks
 ├── .gitignore
@@ -200,5 +197,3 @@ La ejecución institucional procesa los archivos diarios completos y produce sus
 - **Qué pide el curso.** El PDF reúne los requisitos y sus porcentajes. [Enunciado de la Entrega 2](docs/Proyecto_Final_2026-20_OceanWatch_AIS%20-%20Parte%202.pdf).
 - **Qué cambió y cómo sustentarlo.** La bitácora relaciona cada requisito con su implementación, documenta decisiones sobre calidad y llegadas tardías y propone un recorrido de sustentación. La guía PDF recoge la secuencia de demostración del equipo. Su paso «Aplicar el incremento al repositorio» ya está incorporado en este ZIP completo. El primer notebook que se ejecuta es `00_setup`. [Bitácora de la Entrega 2](docs/bitacora_entrega2.md) · [Guía OceanWatch](docs/Guia_OceanWatch.pdf).
 - **Qué se revisa en Databricks.** Las evidencias salen de la ejecución del job, la publicación del tablero, los permisos y el registro institucional del modelo.
-
-El inventario [SHA256SUMS.txt](integracion/SHA256SUMS.txt) contiene las huellas del paquete previo a esta actualización del README.
