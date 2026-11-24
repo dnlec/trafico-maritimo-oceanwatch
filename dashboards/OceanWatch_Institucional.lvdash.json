@@ -59,10 +59,10 @@
       "name": "ranking",
       "displayName": "Ranking",
       "queryLines": [
-        "WITH p AS (SELECT numero_puerto, puerto, pais, count(DISTINCT MMSI) AS buques\n",
-        " FROM dbr_acad_ingsistemas_mine.default.oceanwatch_gold_presencia_puertos WHERE fecha = :dia GROUP BY numero_puerto, puerto, pais)\n",
-        "SELECT concat(lpad(cast(row_number() over(order by buques DESC, puerto, pais, numero_puerto) as string), 2, '0'),' · ',puerto,' · ',pais,' · ',numero_puerto) AS nombre, buques\n",
-        "FROM p ORDER BY buques DESC, puerto, pais, numero_puerto LIMIT 12"
+        "WITH p AS (SELECT puerto, pais, count(DISTINCT MMSI) AS buques\n",
+        " FROM dbr_acad_ingsistemas_mine.default.oceanwatch_gold_presencia_puertos WHERE fecha = :dia GROUP BY puerto, pais)\n",
+        "SELECT concat(lpad(cast(row_number() over(order by buques DESC, puerto, pais) as string), 2, '0'),' · ',puerto,' · ',pais) AS nombre, buques\n",
+        "FROM p ORDER BY buques DESC, puerto, pais LIMIT 12"
       ],
       "parameters": [
         {
@@ -86,8 +86,8 @@
       "name": "presencia",
       "displayName": "Presencia",
       "queryLines": [
-        "SELECT puerto, pais, numero_puerto, MMSI, inicio, fin, n_posiciones FROM dbr_acad_ingsistemas_mine.default.oceanwatch_gold_presencia_puertos\n",
-        "WHERE fecha = :dia ORDER BY n_posiciones DESC, puerto, numero_puerto, MMSI"
+        "SELECT puerto, pais, MMSI, inicio, fin, n_posiciones FROM dbr_acad_ingsistemas_mine.default.oceanwatch_gold_presencia_puertos\n",
+        "WHERE fecha = :dia ORDER BY n_posiciones DESC, puerto, MMSI"
       ],
       "parameters": [
         {
@@ -589,10 +589,6 @@
                       "expression": "`pais`"
                     },
                     {
-                      "name": "numero_puerto",
-                      "expression": "`numero_puerto`"
-                    },
-                    {
                       "name": "MMSI",
                       "expression": "`MMSI`"
                     },
@@ -625,10 +621,6 @@
                   {
                     "fieldName": "pais",
                     "displayName": "País"
-                  },
-                  {
-                    "fieldName": "numero_puerto",
-                    "displayName": "WPI"
                   },
                   {
                     "fieldName": "MMSI",

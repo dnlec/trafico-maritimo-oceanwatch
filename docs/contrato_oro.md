@@ -9,7 +9,7 @@ Los productos son tablas Delta administradas y particionadas por `fecha`. Una fe
 | Tabla | Llave y unidad | Fuente directa | Consumidor |
 | --- | --- | --- | --- |
 | `oceanwatch_gold_trayectorias` | `fecha, MMSI` · un buque al día | Silver | KPI de buques y modelo de velocidad |
-| `oceanwatch_gold_presencia_puertos` | `fecha, numero_puerto, MMSI` · presencia observada | Silver y World Port Index | Ranking y lista de buques |
+| `oceanwatch_gold_presencia_puertos` | `fecha, MMSI, puerto` · presencia observada | Silver y World Port Index | Ranking y lista de buques |
 | `oceanwatch_gold_trafico_celda_hora` | `fecha, hora, h3_cell` · celda H3 y hora UTC | Silver | Mapa de intensidad |
 | `oceanwatch_gold_anomalias` | `fecha, MMSI` · evaluación diaria | Trayectorias, historial anterior y versión MLflow | Cobertura, alertas y trazabilidad |
 
@@ -27,8 +27,7 @@ Los productos son tablas Delta administradas y particionadas por `fecha`. Una fe
 
 | En presencia portuaria | Tipo | Significado y regla |
 | --- | --- | --- |
-| `numero_puerto` | INT | Identificador WPI del puerto. Distingue puertos homónimos. |
-| `puerto`, `pais` | STRING | Nombre y país publicados por el WPI. El campo fuente `Country Code` contiene nombres de país en el CSV del equipo. |
+| `puerto`, `pais` | STRING | Nombre y país publicados por el WPI. El campo fuente `Country Code` contiene nombres de país en el CSV del equipo. Dos puertos homónimos del mismo país quedan en la misma fila. |
 | `n_posiciones` | BIGINT | Mensajes del buque en la celda H3 de resolución 7 del puerto o en su primer anillo. Mínimo uno. |
 | `inicio`, `fin` | TIMESTAMP | Primera y última observación del buque en esa vecindad durante el día. El intervalo puede contener salidas y regresos. |
 
@@ -87,11 +86,11 @@ flowchart TD
   T --> X
 ```
 
-El modo `verificar` consulta el linaje observado en `system.access.table_lineage`. Si la universidad limita esa tabla, abrir **Catalog Explorer → tabla → Lineage**. El modelo se rastrea por `modelo_version`, `run_id`, firma de la muestra y datos de entrada registrados en MLflow. El diagrama documenta las dependencias previstas.
+El linaje se mira en **Catalog Explorer → tabla → Lineage**. El modelo se rastrea por `modelo_version`, `run_id`, firma de la muestra y datos de entrada registrados en MLflow. El diagrama documenta las dependencias previstas.
 
 ## Controles de aceptación
 
-El modo `verificar` compara para la fecha elegida los conteos de Silver con la suma de `n_posiciones` en trayectorias y tráfico. Verifica la unicidad de las cuatro llaves, el balance de Silver y la cobertura del producto ML. El bono compara conteo y suma decimal de hashes de filas de cada tabla entre dos hosts diferentes. Las huellas se calculan en UTC sobre las columnas en el orden del contrato.
+Para una fecha, el conteo de silver se compara con la suma de `n_posiciones` en trayectorias y tráfico. El balance de cada batch está en `oceanwatch_metricas_silver`. El bono compara conteo y suma decimal de hashes de filas de cada tabla entre dos hosts diferentes. Las huellas se calculan en UTC sobre las columnas en el orden del contrato.
 
 ## Fuentes
 
