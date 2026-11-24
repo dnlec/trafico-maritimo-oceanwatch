@@ -40,13 +40,12 @@ La tabla lleva **comentarios** (catálogo, esquema, tabla y cada columna) y **me
 │   └── 05_ml.ipynb                             # Anomalías de velocidad con MLflow
 ├── dashboards/                                 # Definición del tablero AI/BI de la Entrega 2
 │   └── OceanWatch_Institucional.lvdash.json
-├── docs/                                       # Enunciados, diccionario, contrato de oro, guía y bitácora
+├── docs/                                       # Enunciados, diccionario, contrato de oro y bitácora
 │   ├── Proyecto_Final_2026-20_OceanWatch_AIS - Parte 1.pdf
 │   ├── project-instructions-part-1.md
 │   ├── data-dictionary.md
 │   ├── data-dictionary.pdf
 │   ├── Proyecto_Final_2026-20_OceanWatch_AIS - Parte 2.pdf
-│   ├── Guia_OceanWatch.pdf
 │   ├── contrato_oro.md
 │   └── bitacora_entrega2.md
 ├── exploration/                                # Resultados exportados de la exploración de la Entrega 1
@@ -195,5 +194,5 @@ La ejecución institucional procesa los archivos diarios completos y produce sus
 ### Documentación y evidencias de la Entrega 2
 
 - **Qué pide el curso.** El PDF reúne los requisitos y sus porcentajes. [Enunciado de la Entrega 2](docs/Proyecto_Final_2026-20_OceanWatch_AIS%20-%20Parte%202.pdf).
-- **Qué cambió y cómo sustentarlo.** La bitácora relaciona cada requisito con su implementación, documenta decisiones sobre calidad y llegadas tardías y propone un recorrido de sustentación. La guía PDF recoge la secuencia de demostración del equipo. Su paso «Aplicar el incremento al repositorio» ya está incorporado en este ZIP completo. El primer notebook que se ejecuta es `00_setup`. [Bitácora de la Entrega 2](docs/bitacora_entrega2.md) · [Guía OceanWatch](docs/Guia_OceanWatch.pdf).
+- **Qué cambió y cómo sustentarlo.** La bitácora relaciona cada requisito con su implementación, documenta decisiones sobre calidad y llegadas tardías y propone un recorrido de sustentación. El primer notebook que se ejecuta es `00_setup`. [Bitácora de la Entrega 2](docs/bitacora_entrega2.md).
 - **Qué se revisa en Databricks.** Las evidencias salen de la ejecución del job, la publicación del tablero, los permisos y el registro institucional del modelo.
