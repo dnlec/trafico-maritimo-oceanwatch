@@ -1,6 +1,6 @@
 # Contrato de datos de OceanWatch
 
-**Versión 2.1 · Equipo 8 · Entrega 2 de Sistemas Intensivos de Datos.** El catálogo institucional es `dbr_acad_ingsistemas_mine` y el esquema es `default`. En Free Edition el catálogo vinculado es `oceanwatch_externo` y el esquema dentro del share es `oro`. Los nombres de tabla son los mismos. El responsable operativo es `mine-group8`, con los mismos privilegios para `h.benitez@uniandes.edu.co` y `l.galvan@uniandes.edu.co`.
+**Versión 2.1 · Equipo 8 · Entrega 2 de Sistemas Intensivos de Datos.** El catálogo institucional es `dbr_acad_ingsistemas_mine` y el esquema es `default`. El responsable operativo es `mine-group8`, con los mismos privilegios para `h.benitez@uniandes.edu.co` y `l.galvan@uniandes.edu.co`.
 
 Los productos son tablas Delta administradas y particionadas por `fecha`. Una fecha representa el día UTC del evento. La hora de programación del job se expresa en America/Bogota. La disponibilidad de la consola se evalúa tras la finalización de 05. Un reintento sustituye la partición afectada. Cada tabla tiene su propia transacción Delta. El historial y los controles de publicación permiten reconstruir qué ocurrió si se interrumpe una tarea.
 
@@ -60,8 +60,8 @@ Se evalúan anomalías de velocidad dentro de las posiciones aceptadas. Las infr
 - Silver evalúa todas las copias antes de elegir una válida por `MMSI, BaseDateTime`. Dentro del batch se conserva una copia válida. Una versión válida confirmada en un batch anterior queda como registro canónico. Se registra el balance de cada batch y se preserva cada rechazo con sus causas.
 - No hay chequeo de tierra contra mar. El dato NOAA incluye puertos, ríos y los Grandes Lagos, y un mapa de tierra grueso marcaría tráfico real como si estuviera en tierra. La compuerta mira el rango global, el par `(0, 0)`, SOG y COG.
 - En 04 el marcador `oceanwatch_control_oro` se confirma tras las tres escrituras. Una llegada tardía en Silver vuelve a abrir el día afectado hasta la fecha pedida. En 05 la firma de las revisiones de los últimos 14 días y del día puntuado identifica qué resultados de ML requieren actualización.
-- El job diario a las 06:00 de Bogotá hace un replay del archivo histórico. La primera fecha del replay automático es 2023-06-08. El parámetro explícito sirve para un backfill. Registrar la duración en Runs, según el cómputo y el corpus usados.
-- Una columna opcional nueva necesita descripción y una prueba de compatibilidad de los dos tableros. Un cambio en llave, unidad, esquema estructural o definición del score requiere una versión mayor y reprocesamiento explícito.
+- El job diario a las 9:01 de Bogotá hace un replay del archivo histórico. La primera fecha del replay automático es 2023-06-08. El parámetro explícito sirve para un backfill. Registrar la duración en Runs, según el cómputo y el corpus usados.
+- Una columna opcional nueva necesita descripción y una prueba de compatibilidad del tablero. Un cambio en llave, unidad, esquema estructural o definición del score requiere una versión mayor y reprocesamiento explícito.
 
 ## Permisos y linaje
 
@@ -69,8 +69,6 @@ Se evalúan anomalías de velocidad dentro de las posiciones aceptadas. Las infr
 | --- | --- | --- |
 | Operador del job, `mine-group8`, `h.benitez@uniandes.edu.co`, `l.galvan@uniandes.edu.co` | Volume, tablas y modelo | Lectura y escritura del volume, SELECT y MODIFY en las tablas, EXECUTE en `oceanwatch_detector_velocidad` cuando el modelo ya existe. El catálogo y el esquema `default` no se administran desde este proyecto. |
 | Grupo analítico institucional existente | Cuatro tablas de oro | SELECT en cada producto, indicado en `grupo_lectura`. El uso del catálogo y del esquema viene del curso. Para el tablero publicado con credenciales del lector se requiere también CAN VIEW en el tablero y CAN USE en el warehouse. |
-| Destinatario `oceanwatch_eq8_free` | Share de las cuatro tablas | SELECT ON SHARE. El perfil vincula un catálogo en el workspace receptor. |
-
 Revisar grants heredados al demostrar solo lectura. Un integrante que además pertenece a ingeniería puede tener permisos adicionales. Las cuentas individuales del setup original se conservan para la operación del equipo.
 
 ```mermaid
@@ -90,10 +88,10 @@ El linaje se mira en **Catalog Explorer → tabla → Lineage**. El modelo se ra
 
 ## Controles de aceptación
 
-Para una fecha, el conteo de silver se compara con la suma de `n_posiciones` en trayectorias y tráfico. El conteo de cada batch de silver está en `oceanwatch_metricas`, con `etapa = 'silver'`. El bono compara conteo y suma decimal de hashes de filas de cada tabla entre dos hosts diferentes. Las huellas se calculan en UTC sobre las columnas en el orden del contrato.
+Para una fecha, el conteo de silver se compara con la suma de `n_posiciones` en trayectorias y tráfico. El conteo de cada batch de silver está en `oceanwatch_metricas`, con `etapa = 'silver'`.
 
 ## Fuentes
 
 - NOAA Marine Cadastre. [Vessel Traffic](https://hub.marinecadastre.gov/pages/vesseltraffic) y [archivo diario 2023 utilizado por el equipo](https://coast.noaa.gov/htdata/CMSP/AISDataHandler/2023/index.html).
 - NGA. World Port Index incluido en el repositorio como `UpdatedPub150.csv`. [World Port Index](https://msi.nga.mil/Publications/WPI).
-- Databricks. [Model Registry en Unity Catalog](https://docs.databricks.com/aws/en/machine-learning/manage-model-lifecycle), [dashboards AI/BI](https://docs.databricks.com/aws/en/dashboards/) e [instalación de un proveedor Open Sharing](https://docs.databricks.com/aws/en/opensharing/read-data-open-databricks).
+- Databricks. [Model Registry en Unity Catalog](https://docs.databricks.com/aws/en/machine-learning/manage-model-lifecycle) y [dashboards AI/BI](https://docs.databricks.com/aws/en/dashboards/).

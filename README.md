@@ -4,7 +4,7 @@ Análisis de big data sobre tráfico marítimo a partir de datos **AIS** (Automa
 de la NOAA, procesados con **PySpark en Databricks** (Unity Catalog + Delta Lake). Corresponde a la
 Parte 1 del proyecto final.
 
-**Entrega 2.** El trabajo continúa en el mismo repositorio. La segunda entrega procesa un archivo AIS por día en el workspace institucional y publica cuatro productos de oro. Para ejecutarla, ve a [Parte 2: pipeline](#parte-2-pipeline). Allí están el [tablero](#punto-4-consola-de-visualización), la [gobernanza](#punto-5-gobernanza), el [modelo de velocidad](#punto-6-anomalías-de-velocidad-con-mlflow) y el [bono en Free Edition](#bono-delta-sharing-en-free-edition).
+**Entrega 2.** El trabajo continúa en el mismo repositorio. La segunda entrega procesa un archivo AIS por día en el workspace institucional y publica cuatro productos de oro. Para ejecutarla, ve a [Parte 2: pipeline](#parte-2-pipeline). Allí están el [tablero](#punto-4-consola-de-visualización), la [gobernanza](#punto-5-gobernanza) y el [modelo de velocidad](#punto-6-anomalías-de-velocidad-con-mlflow).
 
 ## Datos
 
@@ -37,13 +37,9 @@ La tabla lleva **comentarios** (catálogo, esquema, tabla y cada columna) y **me
 │   ├── 02_bronze.ipynb                         # Auto Loader → Bronze
 │   ├── 03_silver.ipynb                         # Calidad → Silver, cuarentena y métricas
 │   ├── 04_gold.ipynb                           # Trayectorias, presencia en puertos y tráfico
-│   ├── 05_ml.ipynb                             # Anomalías de velocidad con MLflow
-│   └── 06_compartir.ipynb                      # Bono. Share de oro, fuera del job
-├── dashboards/                                 # Definiciones de los tableros AI/BI de la Entrega 2
-│   ├── OceanWatch_Institucional.lvdash.json
-│   └── OceanWatch_Free.lvdash.json
-├── free/                                       # Bono. Notebook que se ejecuta en el workspace receptor
-│   └── 06_consumo_free.ipynb
+│   └── 05_ml.ipynb                             # Anomalías de velocidad con MLflow
+├── dashboards/                                 # Definición del tablero AI/BI de la Entrega 2
+│   └── OceanWatch_Institucional.lvdash.json
 ├── docs/                                       # Enunciados, diccionario, contrato de oro, guía y bitácora
 │   ├── Proyecto_Final_2026-20_OceanWatch_AIS - Parte 1.pdf
 │   ├── project-instructions-part-1.md
@@ -126,7 +122,6 @@ Cada notebook crea los widgets `fecha`, `ancla_replay` e `inicio_run` y después
 | `03_silver.ipynb` | Quita duplicados `(MMSI, BaseDateTime)` y separa válidas de cuarentena | Tarea del job |
 | `04_gold.ipynb` | Trayectorias, presencia en puerto y tráfico celda × hora | Tarea del job |
 | `05_ml.ipynb` | Puntúa anomalías de velocidad y registra el modelo | Quinta tarea del job |
-| `06_compartir.ipynb` | Publica el share del bono | A mano, no va en el job |
 
 `00_setup` copia `UpdatedPub150.csv` desde la raíz del repo (carpeta Git) a `ref/`
 del volume y lo lee desde ahí. El número de puerto del CSV viene como `7950.0`.
@@ -146,15 +141,14 @@ Estas instrucciones usan el job compartido **Orquestracion OceanWatch** y el có
 
 1. **Importar el proyecto y conectar el cómputo.** En el workspace institucional **DBR-ACAD-INGSISTEMAS-MINE**, abre tu carpeta personal en **Workspace → Users** e importa el ZIP. Localiza la carpeta que contiene `src/`, `dashboards/` y `UpdatedPub150.csv`. En el menú de `src/` selecciona **Copy path**. Comprueba que `_config` y los notebooks `00` a `05` están juntos. En **Compute**, inicia `clase14-equipo8` si está detenido y espera a **Running**. Abre `src/00_setup` y selecciónalo en la barra de cómputo. Databricks puede mostrar los notebooks sin la extensión `.ipynb`.
 2. **Ejecutar la preparación.** En `00_setup`, pulsa **Run all** con una identidad que pueda crear los objetos y aplicar los permisos. La celda del WPI debe imprimir `Puertos 3807` con el CSV incluido. Si falta el CSV, abre **Catalog → dbr_acad_ingsistemas_mine → default → Volumes → oceanwatch_data → ref → Upload** y sube `UpdatedPub150.csv` desde la raíz del proyecto. Vuelve a ejecutar `00_setup`.
-3. **Armar el job en la interfaz.** Abre **Jobs & Pipelines → Orquestracion OceanWatch**. El cómputo de cada tarea es `clase14-equipo8`. Las tareas, en orden, son `01_ingesta`, `02_bronze`, `03_silver`, `04_gold` y `05_ml`. Cada una depende de la anterior. En las cinco, los parámetros base son `fecha={{job.parameters.fecha}}`, `ancla_replay={{job.parameters.ancla_replay}}` e `inicio_run={{job.start_time.iso_date}}`. `05_ml` no tiene modo. Parámetros del job: `fecha=AUTO` y `ancla_replay` con el día calendario en que empieza el replay. Cada tarea reintenta 2 veces, con 60 segundos de espera, también si vence el tiempo. Una sola ejecución a la vez. Horario `0 0 6 * * ?` en `America/Bogota`, activo. El correo al fallar queda en **Notifications**.
+3. **Armar el job en la interfaz.** Abre **Jobs & Pipelines → Orquestracion OceanWatch**. El cómputo de cada tarea es `clase14-equipo8`. Las tareas, en orden, son `01_ingesta`, `02_bronze`, `03_silver`, `04_gold` y `05_ml`. Cada una depende de la anterior. En las cinco, los parámetros base son `fecha={{job.parameters.fecha}}`, `ancla_replay={{job.parameters.ancla_replay}}` e `inicio_run={{job.start_time.iso_date}}`. `05_ml` no tiene modo. Parámetros del job: `fecha=AUTO` y `ancla_replay` con el día calendario en que empieza el replay. Cada tarea reintenta 2 veces, con 60 segundos de espera, también si vence el tiempo. Una sola ejecución a la vez. Horario `0 1 9 * * ?` en `America/Bogota` (9:01), activo. El correo al fallar queda en **Notifications**.
 
-`ancla_replay` e `inicio_run` solo importan cuando `fecha` es `AUTO`. `inicio_run` es la fecha UTC en que arrancó esa ejecución del job (`{{job.start_time.iso_date}}`). La fecha AIS es el 8 de junio de 2023 más los días entre `ancla_replay` e `inicio_run`. Ejemplo: ancla `2026-11-24` y el job arranca ese mismo día, entonces el día AIS es `2023-06-08`. Si arranca el `2026-11-25`, el día AIS es `2023-06-09`. Un `fecha` explícito, como `2023-06-07`, ignora la ancla.
+`ancla_replay` e `inicio_run` solo importan cuando `fecha` es `AUTO`. `inicio_run` es la fecha UTC en que arrancó esa ejecución del job (`{{job.start_time.iso_date}}`). La fecha AIS es el 8 de junio de 2023 más los días entre `ancla_replay` e `inicio_run`. Las 9:01 de Bogotá son las 14:01 UTC, así que el día UTC y el día de Bogotá coinciden y el conteo no se corre. Ejemplo: ancla `2026-11-24` y el job arranca ese día a las 9:01, entonces el día AIS es `2023-06-08`. Si arranca el `2026-11-25` a la misma hora, el día AIS es `2023-06-09`. Un `fecha` explícito, como `2023-06-07`, ignora la ancla.
 4. **Procesar las fechas en orden.** En el menú junto a **Run now**, elige la opción que permite cambiar los parámetros de la ejecución. Selecciona las cinco tareas, escribe `2023-06-07` en `fecha` y lanza el job. Espera a que las cinco finalicen con éxito. Repite con `2023-06-08` y luego con `2023-06-09`. Así el modelo tiene días anteriores para evaluar el 9. Si se quiere incorporar al catálogo institucional todo el período de la primera entrega, comienza por el 1 de junio, avanza un día por ejecución hasta el 7 y continúa con los siguientes. La fecha corresponde al día de las señales en UTC.
 5. **Publicar la consola institucional.** Usa la última fecha procesada, el JSON institucional y un SQL warehouse del equipo. [Punto 4. Consola de visualización](#punto-4-consola-de-visualización).
 6. **Comprobar gobernanza y ML.** Revisa permisos y linaje, concilia los conteos del día y sigue una alerta hasta la versión registrada. [Punto 5. Gobernanza](#punto-5-gobernanza) · [Punto 6. Anomalías de velocidad con MLflow](#punto-6-anomalías-de-velocidad-con-mlflow).
-7. **Demostrar el bono.** Comparte oro desde la universidad y abre la segunda consola en un workspace independiente. [Bono. Delta Sharing en Free Edition](#bono-delta-sharing-en-free-edition).
 
-`00_setup` no va en el job. La programación configurada es diaria a las **06:00 de Bogotá** (`America/Bogota`), con dos reintentos por tarea y una ejecución simultánea. El parámetro `fecha=AUTO` avanza por el archivo histórico desde `2023-06-08` según los días transcurridos desde `ancla_replay`. Para reprocesar un día, usa una fecha explícita en **Run now**. Para acreditar el punto 3, abre **Runs** y conserva una ejecución exitosa iniciada por el calendario (`PERIODIC`) con sus cinco tareas. Las notificaciones de fallos se revisan en **Notifications** del job.
+`00_setup` no va en el job. La programación configurada es diaria a las **9:01 de Bogotá** (`America/Bogota`, Quartz `0 1 9 * * ?`), con dos reintentos por tarea y una ejecución simultánea. El parámetro `fecha=AUTO` avanza por el archivo histórico desde `2023-06-08` según los días transcurridos desde `ancla_replay`. Para reprocesar un día, usa una fecha explícita en **Run now**. Para acreditar el punto 3, abre **Runs** y conserva una ejecución exitosa iniciada por el calendario (`PERIODIC`) con sus cinco tareas. Las notificaciones de fallos se revisan en **Notifications** del job.
 
 ### Punto 4. Consola de visualización
 
@@ -201,20 +195,10 @@ El modelo **Isolation Forest** aprende de buques-día elegibles de los **14 día
 
 La ejecución institucional procesa los archivos diarios completos y produce sus propios conteos y versiones.
 
-### Bono. Delta Sharing en Free Edition
-
-En el bono intervienen dos workspaces. El institucional **provee** las cuatro tablas de oro mediante **Delta Sharing con Open Sharing**. Un workspace independiente de **Databricks Free Edition** **lee** esas tablas y publica su propio tablero con su propio SQL warehouse. Para comprobar que ambos ven los mismos resultados, se compara una fecha con datos en los dos entornos.
-
-1. **Universidad, publicar el share.** Abre `src/06_compartir` con la fecha del tablero, por ejemplo `2023-06-09`, y pulsa **Run all**. `CREATE SHARE` falla con `PERMISSION_DENIED` mientras `mine-group8` no tenga ese privilegio en el metastore. Si un administrador ya creó el share y el destinatario, el notebook agrega las tablas. Comprueba que `oceanwatch_eq8_oro` contiene las cuatro tablas con alias bajo `oro` y que el destinatario `oceanwatch_eq8_free` tiene `SELECT` sobre el share. Copia el JSON de control que imprime la última celda. Contiene el host del proveedor, la fecha, el conteo y una suma de hashes por tabla.
-2. **Universidad, obtener el perfil de activación.** En **Catalog → OpenSharing / Delta Sharing → Shared by me → Recipients**, abre `oceanwatch_eq8_free`. Usa **Activation link** para obtener el perfil `.share` del destinatario. El perfil contiene la credencial de lectura y se entrega en privado al responsable del workspace Free. El JSON del paso anterior sirve para comparar resultados.
-3. **Free Edition, vincular los datos.** Entra al workspace independiente. En **Catalog → OpenSharing → Shared with me → Install share**, importa el `.share` como proveedor `oceanwatch_equipo8_open`. Abre el share `oceanwatch_eq8_oro` y crea el catálogo `oceanwatch_externo`. En **Catalog → oceanwatch_externo → oro** deben aparecer las cuatro tablas. Esta vinculación permite consultar los productos que publica la universidad.
-4. **Free Edition, ejecutar y publicar.** Importa el [notebook consumidor](free/06_consumo_free.ipynb) y localiza el [JSON del tablero de Free](dashboards/OceanWatch_Free.lvdash.json) en ese workspace. Abre `06_consumo_free` con el cómputo de Free y ejecuta la primera celda de código para crear los widgets. Coloca `fecha=2023-06-09`, pega el JSON de control en `firma_proveedor`, indica el `warehouse_id` **de Free**, pega la ruta absoluta de su JSON en `ruta_dashboard` y selecciona `publicar=si`. Con el proveedor ya instalado, `ruta_perfil` se deja vacío. Pulsa **Run all**.
-5. **Acreditar la interoperabilidad.** La salida debe decir `Las cuatro tablas coinciden entre los dos workspaces.` y mostrar un enlace `Tablero publicado`. El notebook comprueba que los hosts sean distintos y que coincidan la fecha, los conteos y las sumas de hashes de las cuatro tablas. Abre el enlace emitido en Free, selecciona la misma fecha en **Día AIS · UTC** y compara sus indicadores con los del tablero institucional. Para la entrega, conserva ambos enlaces y la salida de la comparación.
-
 ### Documentación y evidencias de la Entrega 2
 
-- **Qué pide el curso.** El PDF reúne los requisitos, sus porcentajes y las condiciones del bono. [Enunciado de la Entrega 2](docs/Proyecto_Final_2026-20_OceanWatch_AIS%20-%20Parte%202.pdf).
+- **Qué pide el curso.** El PDF reúne los requisitos y sus porcentajes. [Enunciado de la Entrega 2](docs/Proyecto_Final_2026-20_OceanWatch_AIS%20-%20Parte%202.pdf).
 - **Qué cambió y cómo sustentarlo.** La bitácora relaciona cada requisito con su implementación, documenta decisiones sobre calidad y llegadas tardías y propone un recorrido de sustentación. La guía PDF recoge la secuencia de demostración del equipo. Su paso «Aplicar el incremento al repositorio» ya está incorporado en este ZIP completo. El primer notebook que se ejecuta es `00_setup`. [Bitácora de la Entrega 2](docs/bitacora_entrega2.md) · [Guía OceanWatch](docs/Guia_OceanWatch.pdf).
-- **Qué se revisa en Databricks.** Las evidencias salen de la ejecución del job, la publicación de los tableros, los permisos y el registro institucional del modelo.
+- **Qué se revisa en Databricks.** Las evidencias salen de la ejecución del job, la publicación del tablero, los permisos y el registro institucional del modelo.
 
 El inventario [SHA256SUMS.txt](integracion/SHA256SUMS.txt) contiene las huellas del paquete previo a esta actualización del README.
