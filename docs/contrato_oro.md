@@ -90,7 +90,7 @@ El linaje se mira en **Catalog Explorer → tabla → Lineage**. El modelo se ra
 
 ## Controles de aceptación
 
-Para una fecha, el conteo de silver se compara con la suma de `n_posiciones` en trayectorias y tráfico. El balance de cada batch está en `oceanwatch_metricas_silver`. El bono compara conteo y suma decimal de hashes de filas de cada tabla entre dos hosts diferentes. Las huellas se calculan en UTC sobre las columnas en el orden del contrato.
+Para una fecha, el conteo de silver se compara con la suma de `n_posiciones` en trayectorias y tráfico. El conteo de cada batch de silver está en `oceanwatch_metricas`, con `etapa = 'silver'`. El bono compara conteo y suma decimal de hashes de filas de cada tabla entre dos hosts diferentes. Las huellas se calculan en UTC sobre las columnas en el orden del contrato.
 
 ## Fuentes
 
